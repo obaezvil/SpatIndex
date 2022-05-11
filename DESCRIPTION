@@ -10,6 +10,8 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Imports: 
+    hydroTSM,
     RcppRoll,
-    terra
+    terra,
+    tools
 RoxygenNote: 7.1.2

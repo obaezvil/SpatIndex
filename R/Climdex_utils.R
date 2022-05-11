@@ -15,19 +15,20 @@
 
 #' Maximum 1-day precipitation
 #'
-#' @param rst.path File path to daily raster files for the period of analysis. 
-#'  These files should include the date in any format.
+#' @param rst.path File path to either:
+#' #' \itemize{
+#'   \item{'GTiff files': }{Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '%Y-%m-%d'.}
+#'   \item{'NCDF files': }{Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '%Y-%m'.}
+#'}
 #' @param vct Vector file of the study area (Optional). It will be used to crop 
 #'  the spatial extent of the raster files if required. This parameter is set 
 #'  to 'NULL' 
-#' @param temporal_scale either 'total' to use all the period of record, or
-#'  'annual' to compute the index annually (From Jan to Dec)
-#' @param start_date Position where the dates of the raster files start
-#' @param end_date Position where the dates of the raster files end
-#' @param date.fmt Format of the dates included in the file names (default = 
-#'  "%Y-%m-%d")
-#' @param pattern Set to NULL. Is there a specific pattern to list the 
-#'  raster files?
+#' @param start_date Position where the dates of the raster files start. For example, start_date = 10 for 'ProductX_1989-02-28.tif' as the date start in the 10th character.
+#' @param end_date Position where the dates of the raster files end. For example, end_date = 19 for 'ProductX_1989-02-28.tif', and end_date = 16 for 'ProductX_1989-02.nc'.
+#' @param init_month Numeric value that represents the initial month that will be used in the calculation of the indices for each year (1 = Jan, 2 = Feb, ...., 12 = December). 
+#' This parameter is set to NULL meaning that if not specified, the year will start in January.
+#' @param index_fun The function that will be applied to the raster layers. 
+#' @param index_args List of additional arguments to be passed to the selected function ('index_fun'). 
 #'
 #' @return
 #'

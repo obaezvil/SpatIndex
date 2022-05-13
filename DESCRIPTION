@@ -1,12 +1,11 @@
 Package: SpatIndex
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Calculate spatially distributed hydroclimatological indices
 Version: 0.1.0
 Author: Oscar M. Baez-Villanueva
 Maintainer: Oscar M. Baez-Villanueva <obaezvil@gmail.com>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Description: Compute different hydroclimatological indices related to extreme events and droughts using gridded data. This package allows you to obtain the spatial distribution of any selected index.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: 

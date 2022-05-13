@@ -2,7 +2,7 @@
 
 Spatial indices to monitor global change 
 
-Simple way of computing hydrclimatological indices in R. The users are able to compute state-of-the-art indices by providing the file path to daily tiff files.
+Simple way of computing hydroclimatological indices in R. The users are able to compute state-of-the-art indices by providing the file path to daily tiff files.
 
 The indices included in this package to date are:
 

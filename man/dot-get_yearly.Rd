@@ -7,6 +7,12 @@
 .get_yearly(rst_path, init_month = NULL, start_date, end_date, selected_year)
 }
 \arguments{
+\item{rst_path}{File path to either:
+\itemize{
+ \item'GTiff files': Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '\%Y-\%m-\%d'.
+ \item'NCDF files': Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '\%Y-\%m'.
+}}
+
 \item{init_month}{Numeric value that represents the initial month that will be used in the calculation of the indices for each year (1 = Jan, 2 = Feb, ...., 12 = December). 
 This parameter is set to NULL meaning that if not specified, the year will start in January.}
 

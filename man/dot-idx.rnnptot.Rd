@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{rst}{'SpatRaster' object with daily precipitation values.}
+
+\item{thres}{Threshold value that corresponds to nn.}
 }
 \value{
 Contribution to total precipitation from very wet days (0.95) and extremely wet days (0.99)

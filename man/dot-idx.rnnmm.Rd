@@ -9,6 +9,8 @@ for Rnnmm thres = nn)}
 }
 \arguments{
 \item{rst}{'SpatRaster' object with daily precipitation values.}
+
+\item{thres}{Threshold value that corresponds to nn.}
 }
 \value{
 Annual count of days when PRCP >= a designed threshold

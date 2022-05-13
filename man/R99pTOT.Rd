@@ -7,9 +7,15 @@
 R99pTOT(rst_path, vct = NULL, start_date, end_date, init_month = NULL)
 }
 \arguments{
+\item{rst_path}{File path to either:
+\itemize{
+ \item'GTiff files': Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format  '\%Y-\%m-\%d'. 
+ \item'NCDF files': Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format  '\%Y-\%m'. 
+}}
+
 \item{vct}{Vector file of the study area (Optional). It will be used to crop 
 the spatial extent of the raster files if required. This parameter is set 
-to 'NULL'}
+to 'NULL'.}
 
 \item{start_date}{Position where the dates of the raster files start. For example, start_date = 10 for 'ProductX_1989-02-28.tif' as the date start in the 10th character.}
 

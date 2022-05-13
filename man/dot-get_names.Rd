@@ -7,6 +7,12 @@
 .get_names(rst_path, start_date, end_date)
 }
 \arguments{
+\item{rst_path}{File path to either:
+\itemize{
+ \item'GTiff files': Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '\%Y-\%m-\%d'.
+ \item'NCDF files': Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '\%Y-\%m'.
+}}
+
 \item{start_date}{Position where the dates of the raster files start. For example, start_date = 10 for 'ProductX_1989-02-28.tif' as the date start in the 10th character.}
 
 \item{end_date}{Position where the dates of the raster files end. For example, end_date = 19 for 'ProductX_1989-02-28.tif', and end_date = 16 for 'ProductX_1989-02.nc'.}

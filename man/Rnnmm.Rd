@@ -2,44 +2,25 @@
 % Please edit documentation in R/Climdex.R
 \name{Rnnmm}
 \alias{Rnnmm}
-\title{Annual count of days when PRCP ≥ nn mm, where nn is a user-defined threshold}
+\title{Annual count of days when PRCP ≥ nn mm}
 \usage{
-Rnnmm(
-  rst.path,
-  vct = NULL,
-  thres,
-  temporal.scale = c("total", "annual"),
-  start.date,
-  end.date,
-  date.fmt = "\%Y-\%m-\%d",
-  pattern = NULL
-)
+Rnnmm(rst_path, vct = NULL, start_date, end_date, init_month = NULL, thres)
 }
 \arguments{
-\item{rst.path}{File path to daily raster files for the period of analysis. 
-These files should include the date in any format.}
-
 \item{vct}{Vector file of the study area (Optional). It will be used to crop 
 the spatial extent of the raster files if required. This parameter is set 
-to 'NULL' 
-@param thres user-defined threshold}
+to 'NULL'}
 
-\item{temporal.scale}{either 'total' to use all the period of record, or
-'annual' to compute the index annually (From Jan to Dec)}
+\item{start_date}{Position where the dates of the raster files start. For example, start_date = 10 for 'ProductX_1989-02-28.tif' as the date start in the 10th character.}
 
-\item{start.date}{Position where the dates of the raster files start}
+\item{end_date}{Position where the dates of the raster files end. For example, end_date = 19 for 'ProductX_1989-02-28.tif', and end_date = 16 for 'ProductX_1989-02.nc'.}
 
-\item{end.date}{Position where the dates of the raster files end}
-
-\item{date.fmt}{Format of the dates included in the file names (default = 
-"%Y-%m-%d")}
-
-\item{pattern}{Set to NULL. Is there a specific pattern to list the 
-raster files?}
+\item{init_month}{Numeric value that represents the initial month that will be used in the calculation of the indices for each year (1 = Jan, 2 = Feb, ...., 12 = December). 
+This parameter is set to NULL meaning that if not specified, the year will start in January.}
 }
 \value{
-
+raster layers with the spatial distribution of the annual count of days when PRCP ≥ nn mm (where nn is a user selected threshold) for each year of analysis.
 }
 \description{
-Annual count of days when PRCP ≥ nn mm, where nn is a user-defined threshold
+Annual count of days when PRCP ≥ nn mm
 }

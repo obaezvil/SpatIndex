@@ -15,11 +15,12 @@
 
 #' Retrieve SpatRaster for a selected year
 #'
-#' @param rst.path File path to either:
-#' #' \itemize{
-#'   \item{'GTiff files': }{Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '%Y-%m-%d'.}
-#'   \item{'NCDF files': }{Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '%Y-%m'.}
+#' @param rst_path File path to either:
+#' \itemize{
+#'  \item'GTiff files': Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '\%Y-\%m-\%d'.
+#'  \item'NCDF files': Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '\%Y-\%m'.
 #'}
+#'
 #' @param init_month Numeric value that represents the initial month that will be used in the calculation of the indices for each year (1 = Jan, 2 = Feb, ...., 12 = December). 
 #' This parameter is set to NULL meaning that if not specified, the year will start in January.
 #' @param start_date Position where the dates of the raster files start. For example, start_date = 10 for 'ProductX_1989-02-28.tif' as the date start in the 10th character.
@@ -122,11 +123,12 @@
 
 #' Get layer names, extension, and dates
 #'
-#' @param rst.path File path to either:
-#' #' \itemize{
-#'   \item{'GTiff files': }{Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '%Y-%m-%d'.}
-#'   \item{'NCDF files': }{Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '%Y-%m'.}
+#' @param rst_path File path to either:
+#' \itemize{
+#'  \item'GTiff files': Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '\%Y-\%m-\%d'.
+#'  \item'NCDF files': Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '\%Y-\%m'.
 #'}
+#'
 #' @param start_date Position where the dates of the raster files start. For example, start_date = 10 for 'ProductX_1989-02-28.tif' as the date start in the 10th character.
 #' @param end_date Position where the dates of the raster files end. For example, end_date = 19 for 'ProductX_1989-02-28.tif', and end_date = 16 for 'ProductX_1989-02.nc'.
 #'

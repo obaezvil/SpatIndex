@@ -16,11 +16,12 @@
 
 #' Maximum 1-day precipitation
 #'
-#' @param rst.path File path to either:
-#' #' \itemize{
-#'   \item{'GTiff files': }{Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '%Y-%m-%d'.}
-#'   \item{'NCDF files': }{Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '%Y-%m'.}
+#' @param rst_path File path to either:
+#' \itemize{
+#'  \item'GTiff files': Daily raster files that include the date in the file names (e.g., 'ProductX_1989-02-28.tif'). The dates must have the format '\%Y-\%m-\%d'.
+#'  \item'NCDF files': Monthly raster files that contain the daily layers respective for that month. The file name must include the date (e.g., 'ProductX_1989-02.nc'). The dates must have the format '\%Y-\%m'.
 #'}
+#'
 #' @param vct Vector file of the study area (Optional). It will be used to crop 
 #'  the spatial extent of the raster files if required. This parameter is set 
 #'  to 'NULL' 
@@ -31,7 +32,7 @@
 #' @param index_fun The function that will be applied to the raster layers. 
 #' @param index_args List of additional arguments to be passed to the selected function ('index_fun'). 
 #'
-#' @return
+#' @return this function applies any selected Climdex index.
 #'
 #' @examples
 .apply_index <- function(rst_path, 
@@ -221,6 +222,7 @@
 #' for Rnnmm thres = nn)
 #'
 #' @param rst 'SpatRaster' object with daily precipitation values.
+#' @param thres Threshold value that corresponds to nn.
 #'
 #' @return Annual count of days when PRCP >= a designed threshold
 #'
@@ -239,6 +241,7 @@
 #' Rnnp (threshold should be applied: for R95p thres = 0.95; for R99p thres = 0.99)
 #'
 #' @param rst 'SpatRaster' object with daily precipitation values.
+#' @param thres Threshold value that corresponds to nn.
 #'
 #' @return Annual total PRCP when RR > a designed percentile
 #'
@@ -263,7 +266,8 @@
 #' Rnnp (threshold should be applied: for R95pTOT thres = 0.95; for R99pTOT thres = 0.99)
 #'
 #' @param rst 'SpatRaster' object with daily precipitation values.
-#'
+#' @param thres Threshold value that corresponds to nn.
+#' 
 #' @return Contribution to total precipitation from very wet days (0.95) and extremely wet days (0.99)
 #'
 #' @examples

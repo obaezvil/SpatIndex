@@ -12,5 +12,6 @@ Imports:
     hydroTSM,
     RcppRoll,
     terra,
-    tools
+    tools,
+    trend
 RoxygenNote: 7.1.2

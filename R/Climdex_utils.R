@@ -43,6 +43,10 @@
                           index_fun,
                           index_args = list()){
   
+  # Checking the 'vct' object
+  if(!is.null(vct) & class(vct) != "SpatVector")
+    stop("The object 'vct' is not a 'SpatVector'!")
+  
   # Getting product and dates
   res     <- .get_names(rst_path, start_date, end_date)
   product <- res$product
@@ -101,9 +105,10 @@
   results        <- terra::rast(results)
   names(results) <- u_years
   
-  # cropping to extent if given
+  # cropping and masking to extent if given
   if(!is.null(vct)){
-    rst <- terra::crop(rst, vct, snap = "out")
+    results <- terra::crop(results, vct, snap = "out")
+    results <- terra::mask(results, vct)
   }
   
   return(results)

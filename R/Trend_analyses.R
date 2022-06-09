@@ -49,7 +49,7 @@ mk_spatial <- function(rst,
   names(ss) <- c("Sen's_Slope", "Total_change")
   
   # Creating a SpatVect with the spatRast geometry
-  points <- terra::as.points(results[[1]])
+  points <- terra::as.points(mk[[1]])
   
   # Excluding points outside of the 'pval.thres' argument
   points <- points[points$`p-value` < pval.thres,]
@@ -61,7 +61,7 @@ mk_spatial <- function(rst,
   
   # Aggregating results
   results        <- significant_cells
-  terra::add(mk) <- c(mk, ss)
+  terra::add(results) <- c(mk, ss)
   
   if(length(points) < 1){
     warning("The 'Significant_points' layer was not generated because any p-value < ", pval.thres, "!")

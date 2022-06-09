@@ -144,10 +144,14 @@
   if(!is.character(rst_path))
     stop("The parameter 'rst_path' must be a character indicating the path of the stored files!")
   
-  # reading the data
+  # Checking if file exists
+  if(!file.exists(rst_path))
+    stop("The path ", rst_path, " does not exist!")
+  
+  # Reading the data
   product <- list.files(rst_path, full.names = TRUE)
   
-  # checking availability of files
+  # Checking availability of files
   if(length(product) < 1)
     stop("There are no files inside the 'rst_path' directory!")
   
@@ -183,4 +187,8 @@
   return(res)
 
 }
+
+
+
+
 

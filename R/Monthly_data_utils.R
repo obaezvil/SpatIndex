@@ -24,9 +24,9 @@
 #'}
 #' @param start_date Position where the dates of the raster files start. For example, start_date = 10 for 'ProductX_1989-02.tif' as the date start in the 10th character.
 #' @param end_date Position where the dates of the raster files end. For example, end_date = 16 for 'ProductX_1989-02.tif', and end_date = 13 for 'ProductX_1989.nc'.
-#' @param years 
+#' @param years Integer vector indicating the years that should be imported. For example, years <- 2000:2010 for importing monthly data from 2000 to 2010.
 #'
-#' @return
+#' @return SpatRaster of the monthly data that will be used in further analysis.
 #' @export
 #'
 #' @examples
@@ -38,7 +38,7 @@ import_monthly_data <- function(rst_path,
   
   # Checking the 'years' element
   if(!class(years) == "integer" & !is.null(years))
-    stop("The object 'years' must be an integer vector that contains all the years that must be considered!")
+    stop("If object 'years' is not set to NULL, it must be an integer vector that contains all the years that must be considered!")
   
   # Getting product and dates
   res     <- .get_names(rst_path, start_date, end_date)

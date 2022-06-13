@@ -29,7 +29,6 @@
 #'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'Gamma' for SPI.
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
-#' @param na.rm Should the NA values be removed? Set to TRUE.
 #' @param ... Additional variables that can be used for the 'spi' function of the SPEI package.
 
 #'
@@ -99,7 +98,6 @@
 #'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
-#' @param na.rm Should the NA values be removed? Set to TRUE.
 #' @param ... Additional variables that can be used for the 'spi' function of the SPEI package.
 
 #'

@@ -1,3 +1,4 @@
 exportPattern("^[[:alpha:]]+")
 importFrom("stats", "quantile")
+importFrom("stats", "ts")
 importFrom("utils", "modifyList")

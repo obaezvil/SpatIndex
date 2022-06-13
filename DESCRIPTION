@@ -11,6 +11,7 @@ LazyData: true
 Imports: 
     hydroTSM,
     RcppRoll,
+    SPEI,
     terra,
     tools,
     trend

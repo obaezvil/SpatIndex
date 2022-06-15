@@ -4,16 +4,7 @@
 \alias{.spi}
 \title{Utils function to calculate the SPI}
 \usage{
-.spi(
-  x,
-  dates,
-  scale,
-  ref_start = NULL,
-  ref_end = NULL,
-  distribution = "Gamma",
-  fit = "ub-pwm",
-  ...
-)
+.spi(x, dates, scale, ref_start, ref_end, distribution, fit, ...)
 }
 \arguments{
 \item{x}{Numerical vector.}

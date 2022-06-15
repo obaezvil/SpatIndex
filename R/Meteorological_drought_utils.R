@@ -38,10 +38,10 @@
 .spi <- function(x,
                  dates,
                  scale,
-                 ref_start = NULL,
-                 ref_end = NULL,
-                 distribution = "Gamma",
-                 fit = "ub-pwm",
+                 ref_start,
+                 ref_end,
+                 distribution,
+                 fit,
                  ...){
   
   # Format ref_start if it is not NULL
@@ -107,10 +107,10 @@
 .spei <- function(x,
                  dates,
                  scale,
-                 ref_start = NULL,
-                 ref_end = NULL,
-                 distribution = "log-Logistic",
-                 fit = "ub-pwm",
+                 ref_start,
+                 ref_end,
+                 distribution,
+                 fit,
                  ...){
   
   # Format ref_start if it is not NULL

@@ -13,6 +13,5 @@ Imports:
     RcppRoll,
     SPEI,
     terra,
-    tools,
     trend
 RoxygenNote: 7.2.0

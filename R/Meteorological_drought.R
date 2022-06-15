@@ -170,7 +170,7 @@ spatial_spei <- function(P_data,
   diff <- P_data - PE_data
   
   # Apply SPEI
-  idx <- terra::app(diff, .spei, scale = scale, dates = dates, distribution = distribution, fit = fit,
+  idx <- terra::app(diff, .spei, scale = scale, dates = dates_p, distribution = distribution, fit = fit,
                     ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
   
   ## set dates and return

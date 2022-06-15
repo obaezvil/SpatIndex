@@ -1,4 +1,4 @@
-# SpatIndex <img src="./src/Logo/SpatIndex.png" align="right" width="150" />
+# SpatIndex <img src="./inst/logos/SpatIndex.png" align="right" width="150" />
 
 Spatial indices to monitor global change 
 
@@ -66,4 +66,4 @@ Where:
 
 An example of the implementation of **Rx1day** over Sub-Saharan Africa for 1981--2021 can be observed in the following Figure:
 
-<img src="./src/Figures/Sub-Saharan_Africa_Rx1day.png" align="center" width="900" />
+<img src="./inst/logos/Sub-Saharan_Africa_Rx1day.png" align="center" width="900" />

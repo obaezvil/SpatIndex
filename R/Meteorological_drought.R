@@ -40,7 +40,7 @@ spatial_spi <- function(P_data,
                         scale,
                         ref_start = NULL,
                         ref_end = NULL,
-                        distribution = "Gamma",
+                        distribution = "log-Logistic",
                         fit = "ub-pwm",
                         na.rm = TRUE,
                         ...){
@@ -76,8 +76,8 @@ spatial_spi <- function(P_data,
                     ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
   
   ## set dates and return
-  names(idx) <- paste0(substr(dates, 1, 7)) 
-  time(idx)  <- dates
+  names(idx)        <- paste0(substr(dates, 1, 7)) 
+  terra::time(idx)  <- dates
   
   return(idx)
   
@@ -174,8 +174,8 @@ spatial_spei <- function(P_data,
                     ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
   
   ## set dates and return
-  names(idx) <- paste0(substr(dates_p, 1, 7)) 
-  time(idx)  <- dates_p
+  names(idx)        <- paste0(substr(dates_p, 1, 7)) 
+  terra::time(idx)  <- dates_p
   
   return(idx)
   

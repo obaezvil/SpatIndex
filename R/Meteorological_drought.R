@@ -40,7 +40,7 @@ spatial_spi <- function(P_data,
                         scale,
                         ref_start = NULL,
                         ref_end = NULL,
-                        distribution = "log-Logistic",
+                        distribution = "Gamma",
                         fit = "ub-pwm",
                         na.rm = TRUE,
                         ...){
@@ -114,7 +114,7 @@ spatial_spei <- function(P_data,
                         scale,
                         ref_start = NULL,
                         ref_end = NULL,
-                        distribution = "Gamma",
+                        distribution = "log-Logistic",
                         fit = "ub-pwm",
                         na.rm = TRUE,
                         ...){
@@ -125,15 +125,15 @@ spatial_spei <- function(P_data,
   
   # Check scale
   if(!class(scale) %in% c("integer", "numeric"))
-    stop("The object 'scale' must be a integer that represents the time scale at which the SPI will be computed")
+    stop("The object 'scale' must be a integer that represents the time scale at which the SPEI will be computed")
   
   # Check ref_start object
   if(class(ref_start) != "character" & !is.null(ref_start))
-    stop("If object 'ref_start' is not set to NULL, it must be a character object that indicates the starting point of the reference period used for computing the SPI. The format should be '%Y-%m'")
+    stop("If object 'ref_start' is not set to NULL, it must be a character object that indicates the starting point of the reference period used for computing the SPEI. The format should be '%Y-%m'")
   
   # Check ref_end object
   if(class(ref_end) != "character" & !is.null(ref_end))
-    stop("If object 'ref_end' is not set to NULL, it must be a character object that indicates the ending point of the reference period used for computing the SPI. The format should be '%Y-%m'")
+    stop("If object 'ref_end' is not set to NULL, it must be a character object that indicates the ending point of the reference period used for computing the SPEI. The format should be '%Y-%m'")
   
   # Check ref_start and ref_end
   if(is.null(ref_start) & !is.null(ref_end))

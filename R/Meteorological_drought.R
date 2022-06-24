@@ -79,6 +79,10 @@ spatial_spi <- function(P_data,
   names(idx)        <- paste0(substr(dates, 1, 7)) 
   terra::time(idx)  <- dates
   
+  # Avoid NaNs and infinite values
+  idx[is.nan(idx)]      <- NA
+  idx[is.infinite(idx)] <- NA
+  
   return(idx)
   
 }
@@ -176,6 +180,10 @@ spatial_spei <- function(P_data,
   ## set dates and return
   names(idx)        <- paste0(substr(dates_p, 1, 7)) 
   terra::time(idx)  <- dates_p
+  
+  # Avoid NaNs and infinite values
+  idx[is.nan(idx)]      <- NA
+  idx[is.infinite(idx)] <- NA
   
   return(idx)
   

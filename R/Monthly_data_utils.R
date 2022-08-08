@@ -73,14 +73,14 @@ import_monthly_data <- function(rst_path,
   if(!is.null(years)){
     
     y       <- substr(dates, 1, 4)
-    pos     <-which(as.numeric(y) %in% years)
+    pos     <- which(as.numeric(y) %in% years)
     dates   <- dates[pos]
     product <- product[[pos]]
     
   }
   
   # Setting dates to SpatRaster
-  terra::time(product) <-as.Date(dates)
+  terra::time(product) <- as.Date(dates)
 
   return(product)
   

@@ -9,7 +9,7 @@ spatial_spi(
   scale,
   ref_start = NULL,
   ref_end = NULL,
-  distribution = "log-Logistic",
+  distribution = "Gamma",
   fit = "ub-pwm",
   na.rm = TRUE,
   ...

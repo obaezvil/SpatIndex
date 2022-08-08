@@ -10,7 +10,7 @@ spatial_spei(
   scale,
   ref_start = NULL,
   ref_end = NULL,
-  distribution = "Gamma",
+  distribution = "log-Logistic",
   fit = "ub-pwm",
   na.rm = TRUE,
   ...

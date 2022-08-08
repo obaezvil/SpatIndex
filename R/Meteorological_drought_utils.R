@@ -14,7 +14,7 @@
 ################################################################################
 
 
-#' Utils function to calculate the SPI
+#' Utils function to calculate the SPI (SPEI package)
 #'
 #' @param x Numerical vector.
 #' @param dates Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_spi' function.
@@ -35,7 +35,7 @@
 #' @return
 #'
 #' @examples
-.spi <- function(x,
+.spi.spei <- function(x,
                  dates,
                  scale,
                  ref_start,
@@ -83,7 +83,7 @@
 
 
 
-#' Utils function to calculate the SPI
+#' Utils function to calculate the SPI (SPEI package)
 #'
 #' @param x Numerical vector.
 #' @param dates Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_spei' function.
@@ -104,7 +104,7 @@
 #' @return
 #'
 #' @examples
-.spei <- function(x,
+.spei.spei <- function(x,
                  dates,
                  scale,
                  ref_start,

@@ -76,6 +76,9 @@
   
   spi <- as.numeric(spi$fitted)
   
+  # Trasforming NaNs to NAs
+  spi[is.nan(spi)] <- NA
+  
   return(spi)
   
 }
@@ -151,6 +154,9 @@
   # apply the the parameters of the reference period to all data
   spi <- SCI::transformSCI(x, first.mon = 1, obj = spi_ref_params)
   
+  # Trasforming NaNs to NAs
+  spi[is.nan(spi)] <- NA
+  
   return(spi)
   
 }
@@ -219,6 +225,9 @@
                      ref.start = ref_start, ref.end = ref_end, ...)
   
   spei <- as.numeric(spei$fitted)
+  
+  # Trasforming NaNs to NAs
+  spei[is.nan(spei)] <- NA
   
   return(spei)
   
@@ -293,6 +302,9 @@
   
   # apply the the parameters of the reference period to all data
   spei <- SCI::transformSCI(x, first.mon = 1, obj = spei_ref_params)
+  
+  # Trasforming NaNs to NAs
+  spei[is.nan(spei)] <- NA
   
   return(spei)
   

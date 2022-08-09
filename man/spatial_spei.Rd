@@ -13,6 +13,7 @@ spatial_spei(
   distribution = "log-Logistic",
   fit = "ub-pwm",
   na.rm = TRUE,
+  package = "SCI",
   ...
 )
 }
@@ -41,7 +42,8 @@ The default is NULL, which indicates that the last layer in the 'SpatRaster' wil
 \item{fit}{Optional value indicating the name of the method used for computing the distribution function parameters 
 (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.}
 
-\item{na.rm}{Should the NA values be removed? Set to TRUE.}
+\item{na.rm}{Should the NA values be removed? Set to TRUE.
+#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?}
 
 \item{...}{Additional variables that can be used for the 'spi' function of the SPEI package.}
 }

@@ -30,6 +30,7 @@
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
 #' @param na.rm Should the NA values be removed? Set to TRUE.
+#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
 #' @param ... Additional variables that can be used for the 'spi' function of the SPEI package.
 #'
 #' @return Spatially-distributed SPI values.
@@ -43,6 +44,7 @@ spatial_spi <- function(P_data,
                         distribution = "Gamma",
                         fit = "ub-pwm",
                         na.rm = TRUE,
+                        package = "SCI",
                         ...){
   
   # Check P_data
@@ -68,12 +70,26 @@ spatial_spi <- function(P_data,
   if(!is.null(ref_start) & is.null(ref_end))
     stop("The objects 'ref_start' and 'ref_end' should be either both NULL or both character!")
   
+  # Checking the 'package' object
+  if(!package %in% c("SPEI", "SCI"))
+    stop("The 'package' object must be either 'SPEI' or 'SCI'")
+  
   # Extract dates from object
   dates <- terra::time(P_data)
   
   # Apply SPI
-  idx <- terra::app(P_data, .spi.spei, scale = scale, dates = dates, distribution = distribution, fit = fit,
-                    ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
+  if(package == "SPEI"){
+    
+    idx <- terra::app(P_data, .spi.spei, scale = scale, dates = dates, distribution = distribution, fit = fit,
+                      ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
+    
+  } else {
+    
+    idx <- terra::app(P_data, .spi.sci, scale = scale, dates = dates, distribution = distribution, fit = fit,
+                      ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
+    
+  }
+  
   
   ## set dates and return
   names(idx)        <- paste0(substr(dates, 1, 7)) 
@@ -107,6 +123,7 @@ spatial_spi <- function(P_data,
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
 #' @param na.rm Should the NA values be removed? Set to TRUE.
+#' #' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
 #' @param ... Additional variables that can be used for the 'spi' function of the SPEI package.
 #'
 #' @return Spatially-distributed SPEI values.
@@ -121,6 +138,7 @@ spatial_spei <- function(P_data,
                         distribution = "log-Logistic",
                         fit = "ub-pwm",
                         na.rm = TRUE,
+                        package = "SCI",
                         ...){
   
   # Check P_data
@@ -169,13 +187,27 @@ spatial_spei <- function(P_data,
       P_data <- terra::resample(P_data, PE_data, method = "near")
     }
   }
-    
+  
+  # Checking the 'package' object
+  if(!package %in% c("SPEI", "SCI"))
+    stop("The 'package' object must be either 'SPEI' or 'SCI'")
+  
   # Compute P-PE
   diff <- P_data - PE_data
   
   # Apply SPEI
-  idx <- terra::app(diff, .spei.spei, scale = scale, dates = dates_p, distribution = distribution, fit = fit,
-                    ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
+  if(package == "SPEI"){
+    
+    idx <- terra::app(diff, .spei.spei, scale = scale, dates = dates_p, distribution = distribution, fit = fit,
+                      ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
+    
+  } else {
+    
+    idx <- terra::app(diff, .spei.sci, scale = scale, dates = dates_p, distribution = distribution, fit = fit,
+                      ref_start = ref_start, ref_end = ref_end, na.rm = na.rm, ...)
+    
+  }
+  
   
   ## set dates and return
   names(idx)        <- paste0(substr(dates_p, 1, 7)) 

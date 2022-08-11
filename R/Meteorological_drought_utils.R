@@ -141,7 +141,7 @@
     distribution <- tolower(distribution)
   
   if(distribution == "log-Logistic")
-    distribution <- 'genlog'
+    distribution <- 'logis'
   
   if(distribution == "PearsonIII")
     distribution <- 'pe3'
@@ -290,7 +290,7 @@
     distribution <- tolower(distribution)
   
   if(distribution == "log-Logistic")
-    distribution <- 'genlog'
+    distribution <- 'logis'
   
   if(distribution == "PearsonIII")
     distribution <- 'pe3'
@@ -298,7 +298,7 @@
   # Obtaining parameters for the reference period
   spei_ref_params <- SCI::fitSCI(x[pos_ini:pos_fin], first.mon = 1, 
                                 distr = distribution, 
-                                time.scale = scale, p0 = TRUE)
+                                time.scale = scale, p0 = FALSE)
   
   # apply the the parameters of the reference period to all data
   spei <- SCI::transformSCI(x, first.mon = 1, obj = spei_ref_params)
@@ -309,5 +309,85 @@
   return(spei)
   
 }
+
+#' Utils function to calculate deciles
+#'
+#' @param x Numerical vector.
+#'
+#' @return Numerical vector with the corresponding deciles
+#' @export
+#'
+#' @examples
+.deciles <- function(x){
+  
+  # Calculating deciles from a vector
+  deciles <- quantile(x, probs = seq(0, 1, by = 0.1), na.rm = TRUE)
+  
+  # Obtaining mean value between deciles
+  deciles <- zoo::rollapply(deciles, width = 2, mean, 
+                            align = "left", partial = TRUE, na.rm = TRUE)[-11]
+  
+  # Function to get quantile
+  .get.decile <- function(a){
+    
+    euclidean <- sqrt((a - deciles) ^ 2)
+    pos       <- which.min(euclidean)
+    return(pos)
+    
+  }
+  
+  # Apply function to all time series
+  dec <- unlist(lapply(x, .get.decile))
+  
+  # Replace with NAs over areas with full NA vectors
+  if(length(dec) != length(x))
+    dec <- rep(NA, length(x))
+  
+  return(dec)
+  
+}
+
+#' Utils function to calculate percent of normal 
+#'
+#' @param x Numerical vector.
+#' @param dates Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_spei' function.
+#'
+#' @return Numerical vector with the corresponding percent of normal precipitation
+#' @export
+#'
+#' @examples
+.pni <- function(x, dates){
+  
+  # Creating zoo file
+  x <- zoo::zoo(x, dates)
+  
+  # Aggregating mean monthly values
+  monthly <- hydroTSM::monthlyfunction(x, FUN = mean)
+  
+  # Extracting the month from the dates
+  mt <- as.numeric(substr(dates, 6, 7))
+  
+  # Function to compute the pni for each value
+  .get.pni <- function(a, pos, monthly){
+    
+    r <- (as.numeric(a) / as.numeric(monthly)[pos]) * 100
+    
+    return(r)
+    
+  }
+  
+  # Apply function to all time series
+  pni <- unlist(mapply(.get.pni, x, mt, MoreArgs = list(monthly)))
+  
+  # Replace with NAs over areas with full NA vectors
+  if(length(pni) != length(x))
+    pni <- rep(NA, length(x))
+  
+  return(pni)
+  
+}
+
+
+
 
 

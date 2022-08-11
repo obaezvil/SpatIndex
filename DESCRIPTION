@@ -14,5 +14,6 @@ Imports:
     SCI,
     SPEI,
     terra,
-    trend
+    trend,
+    zoo
 RoxygenNote: 7.2.0

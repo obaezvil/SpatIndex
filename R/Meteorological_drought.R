@@ -222,6 +222,69 @@ spatial_spei <- function(P_data,
 }
 
 
+#' Function to calculate the Deciles method
+#'
+#' @param P_data 'SpatRaster' object that contains spatially-distributed monthly precipitation data that will be used to calculate the SPI. 
+#'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
+#'  of the terra package.
+#' @return Spatially-distributed Deciles values.
+#' @export
+#'
+#' @examples
+spatial_deciles <- function(P_data){
+  
+  # Check P_data
+  if(class(P_data) != "SpatRaster")
+    stop("The object 'P_data' must be a SpatRaster")
+  
+  # Extract dates from object
+  dates <- terra::time(P_data)
+  
+  # Apply Deciles
+  idx <- terra::app(P_data, .deciles)
+    
+  ## Set dates and return
+  names(idx)        <- paste0(substr(dates, 1, 7)) 
+  terra::time(idx)  <- dates
+  
+  # Avoid NaN values
+  idx[is.nan(idx)]      <- NA
+  
+  return(idx)
+  
+}
 
-
-
+#' Function to calculate the Percent of Normal Index
+#'
+#' @param P_data 'SpatRaster' object that contains spatially-distributed monthly precipitation data that will be used to calculate the 
+#'  Percent of Normal Index. This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can 
+#'  be set with the function time of the terra package.
+#'
+#' @return Spatially-distributed Percent of Normal Index.
+#' @export
+#'
+#' @examples
+spatial_pni <- function(P_data){
+  
+  # Check P_data
+  if(class(P_data) != "SpatRaster")
+    stop("The object 'P_data' must be a SpatRaster")
+  
+  # Extract dates from P_data object
+  dates <- terra::time(P_data)
+  
+  # Apply PNI
+  idx <- terra::app(P_data, .pni, dates = dates)
+  
+  
+  ## set dates and return
+  names(idx)        <- paste0(substr(dates_p, 1, 7)) 
+  terra::time(idx)  <- dates
+  
+  # Avoid NaNs and infinite values
+  idx[is.nan(idx)]      <- NA
+  idx[is.infinite(idx)] <- NA
+  
+  return(idx)
+  
+}

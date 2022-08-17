@@ -13,7 +13,7 @@
 ################################################################################
 ################################################################################
 
-#' Wrapper function from the SPEI package to calculate the spatially-distributed Standardized Precipitation Index (SPI)
+#' Wrapper function from the SCI and SPEI packages to calculate the spatially-distributed Standardized Precipitation Index (SPI)
 #'
 #' @param P_data 'SpatRaster' object that contains spatially-distributed monthly precipitation data that will be used to calculate the SPI. 
 #'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
@@ -103,7 +103,7 @@ spatial_spi <- function(P_data,
   
 }
 
-#' Wrapper function from the SPEI package to calculate the spatially-distributed Standardized Precipitation-Evapotranspiration Index (SPEI)
+#' Wrapper function from the SCI and SPEI packages to calculate the spatially-distributed Standardized Precipitation-Evapotranspiration Index (SPEI)
 #'
 #' @param P_data 'SpatRaster' object that contains spatially-distributed monthly precipitation data that will be used to calculate the SPEI. 
 #'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
@@ -144,6 +144,10 @@ spatial_spei <- function(P_data,
   # Check P_data
   if(class(P_data) != "SpatRaster")
     stop("The object 'P_data' must be a SpatRaster")
+  
+  # Check PE_data
+  if(class(PE_data) != "SpatRaster")
+    stop("The object 'PE_data' must be a SpatRaster")
   
   # Check scale
   if(!class(scale) %in% c("integer", "numeric"))
@@ -278,7 +282,7 @@ spatial_pni <- function(P_data){
   
   
   ## set dates and return
-  names(idx)        <- paste0(substr(dates_p, 1, 7)) 
+  names(idx)        <- paste0(substr(dates, 1, 7)) 
   terra::time(idx)  <- dates
   
   # Avoid NaNs and infinite values

@@ -2,7 +2,7 @@
 % Please edit documentation in R/Meteorological_drought.R
 \name{spatial_spei}
 \alias{spatial_spei}
-\title{Wrapper function from the SPEI package to calculate the spatially-distributed Standardized Precipitation-Evapotranspiration Index (SPEI)}
+\title{Wrapper function from the SCI and SPEI packages to calculate the spatially-distributed Standardized Precipitation-Evapotranspiration Index (SPEI)}
 \usage{
 spatial_spei(
   P_data,
@@ -51,5 +51,5 @@ The default is NULL, which indicates that the last layer in the 'SpatRaster' wil
 Spatially-distributed SPEI values.
 }
 \description{
-Wrapper function from the SPEI package to calculate the spatially-distributed Standardized Precipitation-Evapotranspiration Index (SPEI)
+Wrapper function from the SCI and SPEI packages to calculate the spatially-distributed Standardized Precipitation-Evapotranspiration Index (SPEI)
 }

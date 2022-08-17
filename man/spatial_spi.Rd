@@ -2,7 +2,7 @@
 % Please edit documentation in R/Meteorological_drought.R
 \name{spatial_spi}
 \alias{spatial_spi}
-\title{Wrapper function from the SPEI package to calculate the spatially-distributed Standardized Precipitation Index (SPI)}
+\title{Wrapper function from the SCI and SPEI packages to calculate the spatially-distributed Standardized Precipitation Index (SPI)}
 \usage{
 spatial_spi(
   P_data,
@@ -47,5 +47,5 @@ The default is NULL, which indicates that the last layer in the 'SpatRaster' wil
 Spatially-distributed SPI values.
 }
 \description{
-Wrapper function from the SPEI package to calculate the spatially-distributed Standardized Precipitation Index (SPI)
+Wrapper function from the SCI and SPEI packages to calculate the spatially-distributed Standardized Precipitation Index (SPI)
 }

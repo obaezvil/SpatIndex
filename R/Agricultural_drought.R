@@ -116,7 +116,42 @@ spatial_vhi <- function(VCI_data, TCI_data, alpha = 0.5, resampling2low = TRUE){
     stop("'dates_tci' and 'TCI_data' have different periods")
   
   # Evaluating spatial resolution
-  # if()
+  if(any(terra::res(VCI_data) != terra::res(TCI_data))){
+    
+    if(resampling2low){
+      
+      # condition if VCI_data has higher resolution
+      if(terra::res(VCI_data)[1] < terra::res(TCI_data)[1] | 
+         terra::res(VCI_data)[2] < terra::res(TCI_data)[2]){
+        
+        VCI_data <- terra::resample(VCI_data, TCI_data, method = "near")
+        
+        # condition if TCI_data has higher resolution
+      } else {
+        
+        TCI_data <- terra::resample(TCI_data, VCI_data, method = "near")
+        
+      }
+      
+      # condition if resampling2low = FALSE 
+    } else {
+      
+      # condition if VCI_data has higher resolution
+      if(terra::res(VCI_data)[1] < terra::res(TCI_data)[1] | 
+         terra::res(VCI_data)[2] < terra::res(TCI_data)[2]){
+        
+        TCI_data <- terra::resample(TCI_data, VCI_data, method = "bilinear")
+        
+        # condition if TCI_data has higher resolution
+      } else {
+        
+        VCI_data <- terra::resample(VCI_data, TCI_data, method = "bilinear")
+        
+      }
+      
+    }
+    
+  }
   
   # Apply VHI
   idx <- ( VCI_data * alpha ) + ( (1 - alpha ) * TCI_data)

@@ -5,7 +5,7 @@
 ##  Collaborators:
 ##
 ################################################################################
-## Objective: calculate meteorological drought indices
+## Objective: calculate agricultural drought indices
 ################################################################################
 ##
 ## Creation date: 2022-08-11
@@ -157,8 +157,8 @@ spatial_vhi <- function(VCI_data, TCI_data, alpha = 0.5, resampling2low = TRUE){
   idx <- ( VCI_data * alpha ) + ( (1 - alpha ) * TCI_data)
   
   ## set dates and return
-  names(idx)        <- paste0(substr(dates, 1, 7)) 
-  terra::time(idx)  <- dates
+  names(idx)        <- paste0(substr(dates_vci, 1, 7)) 
+  terra::time(idx)  <- dates_vci
   
   # Avoid NaNs and infinite values
   idx[is.nan(idx)]      <- NA

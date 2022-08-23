@@ -5,7 +5,7 @@
 ##  Collaborators:
 ##
 ################################################################################
-## Objective: calculate meteorological drought indices
+## Objective: calculate agricultural drought indices
 ################################################################################
 ##
 ## Creation date: 2022-08-11

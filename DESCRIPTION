@@ -9,6 +9,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: 
+    evd,
     hydroTSM,
     RcppRoll,
     SCI,

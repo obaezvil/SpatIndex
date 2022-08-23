@@ -151,7 +151,7 @@
                                 distr = distribution, 
                                 time.scale = scale, p0 = TRUE)
   
-  # apply the the parameters of the reference period to all data
+  # Apply the the parameters of the reference period to all data
   spi <- SCI::transformSCI(x, first.mon = 1, obj = spi_ref_params)
   
   # Trasforming NaNs to NAs
@@ -300,7 +300,7 @@
                                 distr = distribution, 
                                 time.scale = scale, p0 = FALSE)
   
-  # apply the the parameters of the reference period to all data
+  # Apply the the parameters of the reference period to all data
   spei <- SCI::transformSCI(x, first.mon = 1, obj = spei_ref_params)
   
   # Trasforming NaNs to NAs

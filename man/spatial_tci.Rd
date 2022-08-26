@@ -7,7 +7,7 @@
 spatial_tci(BT_data)
 }
 \arguments{
-\item{BT_data}{'SpatRaster' object that contains spatially-distributed BT data that will be used to calculate the TCI. 
+\item{BT_data}{'SpatRaster' object that contains spatially-distributed Brightness Temperature (BT) data that will be used to calculate the TCI. 
 This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
 of the terra package.}
 

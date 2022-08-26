@@ -13,6 +13,7 @@ Imports:
     hydroTSM,
     RcppRoll,
     SCI,
+    spatstat.core,
     SPEI,
     terra,
     trend,

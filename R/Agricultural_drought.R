@@ -47,7 +47,7 @@ spatial_vci <- function(NDVI_data){
 
 #' Temperature Condition Index (TCI; Kogan 1995)
 #'
-#' @param BT_data 'SpatRaster' object that contains spatially-distributed BT data that will be used to calculate the TCI. 
+#' @param BT_data 'SpatRaster' object that contains spatially-distributed Brightness Temperature (BT) data that will be used to calculate the TCI. 
 #'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
 #'  of the terra package.
 #' @param na.rm Should the NA values be removed? Set to TRUE.
@@ -167,4 +167,85 @@ spatial_vhi <- function(VCI_data, TCI_data, alpha = 0.5, resampling2low = TRUE){
   
 }
 
+#' Empirical Standardised Soil Moisture Index (ESSMI)
+#'
+#' @param SM_data 'SpatRaster' object that contains spatially-distributed monthly soil moisture data that will be used to calculate the ESSMI. 
+#'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
+#'  of the terra package.
+#' @param scale Integer value that represents the time scale at which the ESSMI will be computed.
+#' @param ref_start optional value that represents the starting point of the reference period used for computing the index. 
+#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.
+#' @param ref_end Optional value that represents the ending point of the reference period used for computing the index. 
+#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.
+#' @param distribution Optional value indicating the name of the distribution function to be used in the Kernel Density Estimation
+#'  (one of 'Gaussian', 'Rectangular', 'Triangular', 'Epanechnikov', 'Biweight', 'Cosine' and 'Optcosine'). Defaults to 'Gaussian' for ESSMI.
+#' @param bw the smoothing bandwidth to be used. The kernels are scaled such that this is the standard deviation of the smoothing kernel. 
+#' The default is set to the methods of Sheather & Jones (1991) to select the bandwidth using pilot estimation of derivatives.
+#' Please see 'Bandwidth Selectors for Kernel Density Estimation' from 'stats' for more information.
+#' @param ... Additional variables that can be used for the 'density' function.
+#'
+#' @return Spatially-distributed ESSMI values.
+#' @export
+#'
+#' @examples
+spatial_essmi <- function(SM_data,
+                          scale,
+                          ref_start = NULL,
+                          ref_end = NULL,
+                          distribution = "Gaussian",
+                          bw = "SJ",
+                          ...){
+  
+  # Check P_data
+  if(class(SM_data) != "SpatRaster")
+    stop("The object 'SM_data' must be a SpatRaster")
+  
+  # Check scale
+  if(!class(scale) %in% c("integer", "numeric"))
+    stop("The object 'scale' must be a integer that represents the time scale at which the ESSMI will be computed")
+  
+  # Check ref_start object
+  if(class(ref_start) != "character" & !is.null(ref_start))
+    stop("If object 'ref_start' is not set to NULL, it must be a character object that indicates the starting point of the reference period used for computing the SPI. The format should be '%Y-%m'")
+  
+  # Check ref_end object
+  if(class(ref_end) != "character" & !is.null(ref_end))
+    stop("If object 'ref_end' is not set to NULL, it must be a character object that indicates the ending point of the reference period used for computing the SPI. The format should be '%Y-%m'")
+  
+  # Check ref_start and ref_end
+  if(is.null(ref_start) & !is.null(ref_end))
+    stop("The objects 'ref_start' and 'ref_end' should be either both NULL or both character!")
+  
+  if(!is.null(ref_start) & is.null(ref_end))
+    stop("The objects 'ref_start' and 'ref_end' should be either both NULL or both character!")
+  
+  # Check that 'bw' is either numeric or character
+  if(!is.numeric(bw) & !is.integer(bw) & !is.character(bw))
+    stop("'bw' can either be a numerical value or 'nrd0', 'nrd', 'ucv', 'bcv', or 'SJ'!")
+  
+  # If character, check that 'bw' is either 'nrd0', 'nrd', 'ucv', 'bcv', or 'SJ'
+  if(!(is.character(bw) & bw %in% c('nrd0', 'nrd', 'ucv', 'bcv', 'SJ')))
+    stop("'bw' can either be 'nrd0', 'nrd', 'ucv', 'bcv', or 'SJ'!")
+  
+  # Extract dates from object
+  dates <- terra::time(SM_data)
+  
+  # Apply ESSMI
+  idx <- terra::app(SM_data, .essmi, scale = scale, dates = dates, distribution = distribution, bw = bw,
+                      ref_start = ref_start, ref_end = ref_end, ...)
 
+  
+  
+  ## set dates and return
+  names(idx)        <- paste0(substr(dates, 1, 7)) 
+  terra::time(idx)  <- dates
+  
+  # Avoid NaNs and infinite values
+  idx[is.nan(idx)]      <- NA
+  # idx[is.infinite(idx)] <- NA
+  
+  return(idx)
+  
+}

@@ -85,6 +85,7 @@
                    ref_end,
                    distribution,
                    bw,
+                   missing_ratio,
                    ...){  ### pass variables to density
   
   # Checking distribution
@@ -111,12 +112,12 @@
   # Substracting the values for the reference period
   x_ref <- x_zoo[pos_ini:pos_fin]
   
-  # Extracting NA values
-  x_ref <- x_ref[-which(is.na(x_ref))]
+  # Calculating NAs in period
+  nas <- which(is.na(x_ref))
+  missing <- nas / length(x_ref)
   
   # Conditional: if all values are NAs, return NAs (masked regions or oceans)
-  nas <- which(is.na(x_ref))
-  if(length(nas) > length(x_ref) - 2){
+  if(missing_ratio < missing){
     
     essmi <- rep(NA, length(dates))
     

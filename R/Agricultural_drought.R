@@ -196,6 +196,7 @@ spatial_essmi <- function(SM_data,
                           ref_end = NULL,
                           distribution = "Gaussian",
                           bw = "SJ",
+                          missing_ratio = 0.2,
                           ...){
   
   # Check P_data

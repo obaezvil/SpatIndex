@@ -4,7 +4,17 @@
 \alias{.essmi}
 \title{Utils function to calculate the Empirical Standardised Soil Moisture Index (ESSMI)}
 \usage{
-.essmi(x, dates, scale, ref_start, ref_end, distribution, bw, ...)
+.essmi(
+  x,
+  dates,
+  scale,
+  ref_start,
+  ref_end,
+  distribution,
+  bw,
+  missing_ratio,
+  ...
+)
 }
 \arguments{
 \item{x}{Numerical vector.}
@@ -27,6 +37,8 @@ The default is NULL, which indicates that the last layer in the 'SpatRaster' wil
 \item{bw}{the smoothing bandwidth to be used. The kernels are scaled such that this is the standard deviation of the smoothing kernel. 
 The default is set to the methods of Sheather & Jones (1991) to select the bandwidth using pilot estimation of derivatives.
 Please see 'Bandwidth Selectors for Kernel Density Estimation' from 'stats' for more information.}
+
+\item{missing_ratio}{Ratio of missing data that is acceptable for the computation. Set to 0.2 by default (20\%).}
 
 \item{...}{Additional variables that can be used for the 'density' function.}
 }

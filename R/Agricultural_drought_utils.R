@@ -74,6 +74,7 @@
 #' @param bw the smoothing bandwidth to be used. The kernels are scaled such that this is the standard deviation of the smoothing kernel. 
 #' The default is set to the methods of Sheather & Jones (1991) to select the bandwidth using pilot estimation of derivatives.
 #' Please see 'Bandwidth Selectors for Kernel Density Estimation' from 'stats' for more information.
+#' @param missing_ratio Ratio of missing data that is acceptable for the computation. Set to 0.2 by default (20\%).
 #' @param ... Additional variables that can be used for the 'density' function.
 #' @return Numerical vector with the corresponding to the ESSMI
 #'

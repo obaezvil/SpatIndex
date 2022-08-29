@@ -184,6 +184,7 @@ spatial_vhi <- function(VCI_data, TCI_data, alpha = 0.5, resampling2low = TRUE){
 #' @param bw the smoothing bandwidth to be used. The kernels are scaled such that this is the standard deviation of the smoothing kernel. 
 #' The default is set to the methods of Sheather & Jones (1991) to select the bandwidth using pilot estimation of derivatives.
 #' Please see 'Bandwidth Selectors for Kernel Density Estimation' from 'stats' for more information.
+#' @param missing_ratio Ratio of missing data that is acceptable for the computation. Set to 0.2 by default (20\%).
 #' @param ... Additional variables that can be used for the 'density' function.
 #'
 #' @return Spatially-distributed ESSMI values.
@@ -235,7 +236,7 @@ spatial_essmi <- function(SM_data,
   
   # Apply ESSMI
   idx <- terra::app(SM_data, .essmi, scale = scale, dates = dates, distribution = distribution, bw = bw,
-                      ref_start = ref_start, ref_end = ref_end, ...)
+                      ref_start = ref_start, ref_end = ref_end, missing_ratio = missing_ratio, ...)
 
   
   

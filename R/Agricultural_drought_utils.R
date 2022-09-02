@@ -114,15 +114,28 @@
   x_ref <- x_zoo[pos_ini:pos_fin]
   
   # Calculating NAs in period
-  nas <- which(is.na(x_ref))
+  nas <- length(which(is.na(x_ref)))
+  
+  if(length(nas) < 1)
+    nas <- 0
+  
   missing <- nas / length(x_ref)
   
+  # Calculating unique values
+  uniq_vals <- length(unique(x_ref)) / length(x_ref)
+  
   # Conditional: if all values are NAs, return NAs (masked regions or oceans)
-  if(missing_ratio < missing){
+  if(missing_ratio < missing | uniq_vals < 0.4){
     
     essmi <- rep(NA, length(dates))
     
   } else {
+    
+    # Substracting NA values
+    na_pos <- which(is.na(x_ref))
+    
+    if(length(na_pos) > 0)
+      x_ref <- x_ref[-which(is.na(x_ref))]
     
     # Computing the Kernel Density Estimation
     dens <- density(as.numeric(x_ref), bw = bw, kernel = distribution, ...)
@@ -141,13 +154,3 @@
   return(essmi)
   
 }
-
-
-  
-  
-  
-  
-  
-  
-  
-  

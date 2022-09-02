@@ -320,15 +320,15 @@
 #' @examples
 .deciles <- function(x){
   
-  # Calculating deciles from a vector
-  deciles <- quantile(x, probs = seq(0, 1, by = 0.1), na.rm = TRUE)
+  # Creating zoo file
+  x <- zoo::zoo(x, dates)
   
-  # Obtaining mean value between deciles
-  deciles <- zoo::rollapply(deciles, width = 2, mean, 
-                            align = "left", partial = TRUE, na.rm = TRUE)[-11]
+  # Extracting the month from the dates
+  mt        <- as.numeric(substr(dates, 6, 7))
+  mt_unique <- unique(mt)
   
   # Function to get quantile
-  .get.decile <- function(a){
+  .get.decile <- function(a, deciles){
     
     euclidean <- sqrt((a - deciles) ^ 2)
     pos       <- which.min(euclidean)
@@ -336,14 +336,35 @@
     
   }
   
-  # Apply function to all time series
-  dec <- unlist(lapply(x, .get.decile))
-  
+  # Creating a new empty vector
+  result <- c()
+    
+  # Creating a loop for iterating for each month
+  for(i in 1:length(mt_unique)){
+    
+    # Storing the position of the month and subsetting the respective month
+    pos_month <- which(mt %in% mt[i])
+    x_month  <- x[pos_month]
+    
+    # Calculating deciles from a vector
+    deciles <- quantile(x_month, probs = seq(0, 1, by = 0.1), na.rm = TRUE)
+    
+    # Obtaining mean value between deciles
+    deciles <- zoo::rollapply(deciles, width = 2, mean, 
+                              align = "left", partial = TRUE, na.rm = TRUE)[-11]
+    
+    # Apply function to all time series
+    dec <- unlist(lapply(as.numeric(x_month), .get.decile, deciles))
+    
+    # Storing the values in the respective month
+    result[pos_month] <- dec
+  }
+
   # Replace with NAs over areas with full NA vectors
-  if(length(dec) != length(x))
-    dec <- rep(NA, length(x))
+  if(length(result) != length(x))
+    result <- rep(NA, length(x))
   
-  return(dec)
+  return(result)
   
 }
 

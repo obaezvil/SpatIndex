@@ -12,7 +12,7 @@ This 'SpatRaster' must include the time that corresponds to the dates of the res
 of the terra package.}
 }
 \value{
-Spatially-distributed Deciles values.
+Spatially-distributed Decile values.
 }
 \description{
 Function to calculate the Deciles method

@@ -100,5 +100,110 @@
   
 }
 
+#' Utils function to calculate the Empirical Standardised Soil Moisture Index (ESSMI)
+#'
+#' @param x Numerical vector.
+#' @param dates Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_essmi' function.
+#' @param scale Integer value that represents the time scale at which the ESSMI will be computed.
+#' @param missing_ratio Ratio of missing data that is acceptable for the computation. Set to 0.2 by default (20\%).
+#' @param ... Additional variables that can be used for the 'density' function.
+#' @return Numerical vector with the corresponding to the ESSMI
+#'
+#' @examples
+.swei <- function(x, 
+                   dates,
+                   scale, 
+                   missing_ratio){
+  
+  # Applying the accumulation according to scale
+  x_zoo <- zoo::zoo(x, dates)
+  x_zoo <- zoo::rollapply(x_zoo, scale, fill = NA, FUN = sum, align = "right")
+  
+  # Obtaining the resulting unique steps
+  steps   <- substr(index(x_zoo), 6, 10)
+  u_steps <- unique(steps)
+  
+  # Calculating NAs in period
+  nas <- length(which(is.na(x_zoo)))
+  
+  if(length(nas) < 1)
+    nas <- 0
+  
+  missing <- nas / length(x_zoo)
+  
+  # Calculating unique values
+  uniq_vals <- length(unique(x_zoo)) / length(x_zoo)
+  
+  # Conditional: if all values are NAs, return NAs (masked regions or oceans)
+  if(missing_ratio < missing){
+    
+    swei <- rep(NA, length(dates))
+    
+  } else {
+    
+    # Creating an object to store the resulting data
+    swei <- c()
+    
+    #######
+    ####### Loop to evaluate each one of the time steps
+    #######
+    
+    for(i in 1:length(u_steps)){
+      
+      # Extracting the data according to step 'i'
+      pos_step   <- which(steps %in% u_steps[i])
+      x_step     <- x[pos_step]
+      
+      # Dealing with zero values (see Huning et al 2020: https://www.pnas.org/doi/epdf/10.1073/pnas.1915921117)
+      pos_zero <- which(x_step == 0)
+      
+      if(length(pos_zero) > 0){
+        
+        min_val          <- x_step[-pos_zero] - min(x_step[-pos_zero], na.rm = TRUE) / 100
+        min_val          <- min(min_val, na.rm = TRUE)
+        x_step[pos_zero] <- min_val
+      }
+      
+      # Storing the position of the NA values (if any)
+      pos_nas <- which(is.na(x_step))
+      
+      # Removing NA values from vector
+      if(length(pos_nas) > 0)
+        x_step <- x_step[-pos_nas]
+      
+      # Ordering the vector in increasing form
+      x_order <- order(x_step)
+      x_sort  <- x_step[x_order]
+      
+      # Applying the empirical Gringorten plotting position
+      p_ami <- (1:length(x_sort)-0.44) / (length(x_sort) + 0.12)
+      
+      # Applying the inverse standard normal distribution
+      swei_ordered <- qnorm(p_ami)
+      
+      # Ordering the values according to the original data
+      res <- swei_ordered[order(x_order)]
+      
+      # Including the NA values (if any)
+      if(length(pos_nas) > 0)
+        res <- R.utils::insert(res, pos_nas, NA)
+      
+      # Obtaining all values for that time step
+      pos_dates   <- grep(u_steps[i], dates)
+
+      
+      # Storing the standardized values
+      res[which(is.infinite(res))] <- NA
+      res[which(is.nan(res))]      <- NA
+      swei[pos_dates] <- res
+      
+    } # End for
+    
+  } # End if else missing data
+  
+  
+  return(swei)
+  
+}
 
 

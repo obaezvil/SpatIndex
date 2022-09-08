@@ -129,7 +129,7 @@
   uniq_vals <- length(unique(x_ref)) / length(x_ref)
   
   # Conditional: if all values are NAs, return NAs (masked regions or oceans)
-  if(missing_ratio < missing | uniq_vals < 0.4){
+  if(missing_ratio < missing){
     
     essmi <- rep(NA, length(dates))
     
@@ -154,29 +154,39 @@
       if(length(na_pos) > 0)
         x_ref_step <- x_ref_step[-which(is.na(x_ref_step))]
       
-      # Computing the Kernel Density Estimation
-      # dens <- density(as.numeric(x_ref_step), bw = bw, kernel = distribution, ...)
-      dens <- density(as.numeric(x_ref_step), bw = bw, kernel = distribution)
-   
-      # Creating the function to calculate the CDF 
-      cdf_fun <- spatstat.core::CDF(dens)
+      # Calculating unique values
+      uniq_vals <- length(unique(round(x_ref_step, 3)))
       
       # Obtaining all values for that time step
       pos_dates   <- grep(u_steps[i], dates)
       values_step <- x_zoo[pos_dates]
       
-      # Applying the function to all SM values for time step
-      cdf_vals <- cdf_fun(as.numeric(values_step))
-      
-      # Storing the standardized values
-      res <- qnorm(cdf_vals)
-      res[which(is.infinite(res))] <- NA
-      res[which(is.nan(res))]      <- NA
-      essmi[pos_dates] <- res
+      if(uniq_vals > 4){
+          
+        # Computing the Kernel Density Estimation
+        dens <- density(as.numeric(x_ref_step), bw = bw, kernel = distribution, ...)
+     
+        # Creating the function to calculate the CDF 
+        cdf_fun <- spatstat.core::CDF(dens)
+        
+        # Applying the function to all SM values for time step
+        cdf_vals <- cdf_fun(as.numeric(values_step))
+        
+        # Storing the standardized values
+        res <- qnorm(cdf_vals)
+        res[which(is.infinite(res))] <- NA
+        res[which(is.nan(res))]      <- NA
+        essmi[pos_dates] <- res
+        
+      } else {
+        
+        essmi[pos_dates] <- NA
+        
+      } # End if else unique values
       
     } # End for
        
-  } # End if else
+  } # End if else missing data
   
   
   return(essmi)

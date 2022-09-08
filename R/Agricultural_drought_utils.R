@@ -113,6 +113,10 @@
   # Substracting the values for the reference period
   x_ref <- x_zoo[pos_ini:pos_fin]
   
+  # Obtaining the resulting unique steps
+  steps   <- substr(index(x_ref), 6, 10)
+  u_steps <- unique(steps)
+  
   # Calculating NAs in period
   nas <- length(which(is.na(x_ref)))
   
@@ -130,27 +134,51 @@
     essmi <- rep(NA, length(dates))
     
   } else {
+  
+    # Creating an object to store the resulting data
+    essmi <- c()
     
-    # Substracting NA values
-    na_pos <- which(is.na(x_ref))
-    
-    if(length(na_pos) > 0)
-      x_ref <- x_ref[-which(is.na(x_ref))]
-    
-    # Computing the Kernel Density Estimation
-    dens <- density(as.numeric(x_ref), bw = bw, kernel = distribution, ...)
-    
-    # Creating the function to calculate the CDF 
-    cdf_fun <- spatstat.core::CDF(dens)
-    
-    # Applying the function to all SM values
-    cdf_vals <- cdf_fun(as.numeric(x_zoo))
-    
-    # Storing the standardized values
-    essmi <- qnorm(cdf_vals)
-    
-  }
+    #######
+    ####### Loop to evaluate each one of the time steps
+    #######
+  
+    for(i in 1:length(u_steps)){
+      
+      # Extracting the data according to step 'i'
+      pos_step   <- which(steps %in% u_steps[i])
+      x_ref_step <- x_ref[pos_step]
+      
+      # Substracting NA values
+      na_pos <- which(is.na(x_ref_step))
+      
+      if(length(na_pos) > 0)
+        x_ref_step <- x_ref_step[-which(is.na(x_ref_step))]
+      
+      # Computing the Kernel Density Estimation
+      # dens <- density(as.numeric(x_ref_step), bw = bw, kernel = distribution, ...)
+      dens <- density(as.numeric(x_ref_step), bw = bw, kernel = distribution)
+   
+      # Creating the function to calculate the CDF 
+      cdf_fun <- spatstat.core::CDF(dens)
+      
+      # Obtaining all values for that time step
+      pos_dates   <- grep(u_steps[i], dates)
+      values_step <- x_zoo[pos_dates]
+      
+      # Applying the function to all SM values for time step
+      cdf_vals <- cdf_fun(as.numeric(values_step))
+      
+      # Storing the standardized values
+      res <- qnorm(cdf_vals)
+      res[which(is.infinite(res))] <- NA
+      res[which(is.nan(res))]      <- NA
+      essmi[pos_dates] <- res
+      
+    } # End for
+       
+  } # End if else
+  
   
   return(essmi)
-  
+
 }

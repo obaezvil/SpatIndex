@@ -2,24 +2,22 @@
 % Please edit documentation in R/Hydrological_drought_utils.R
 \name{.swei}
 \alias{.swei}
-\title{Utils function to calculate the Empirical Standardised Soil Moisture Index (ESSMI)}
+\title{Utils function to calculate the Snow Water Equivalent Index (SWEI)}
 \usage{
 .swei(x, dates, scale, missing_ratio)
 }
 \arguments{
 \item{x}{Numerical vector.}
 
-\item{dates}{Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_essmi' function.}
+\item{dates}{Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_swei' function.}
 
 \item{scale}{Integer value that represents the time scale at which the ESSMI will be computed.}
 
 \item{missing_ratio}{Ratio of missing data that is acceptable for the computation. Set to 0.2 by default (20\%).}
-
-\item{...}{Additional variables that can be used for the 'density' function.}
 }
 \value{
-Numerical vector with the corresponding to the ESSMI
+Numerical vector with the corresponding to the SWEI
 }
 \description{
-Utils function to calculate the Empirical Standardised Soil Moisture Index (ESSMI)
+Utils function to calculate the Snow Water Equivalent Index (SWEI)
 }

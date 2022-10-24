@@ -36,9 +36,15 @@
                  ref_end,
                  distribution){
   
+  n_col <- ncol(data.frame(x))
   # Setting by default 'pos_ini' and 'pos_fin' as the first and last layer
   pos_ini <- 1
-  pos_fin <- nrow(x)
+  if(n_col != 1){
+    pos_fin <- nrow(x)
+  } else {
+    pos_fin <- length(x)
+  }
+  
   
   # Format ref_start if it is not NULL
   if(!is.null(ref_start)){
@@ -65,9 +71,11 @@
   if(distribution == "log-Logistic")
     distribution <- 'logis'
   
-  if(distribution == "GEV")
+  if(distribution == "GEV"){
+    require(evd)
     distribution <- 'gev'
-  
+  }
+    
   if(distribution == "PearsonIII")
     distribution <- 'pe3'
   
@@ -92,7 +100,11 @@
     ssi[is.nan(ssi)] <- NA
     
     # Populating the res object with the results
-    res[,i] <- ssi
+    if(n_col != 1){
+      res[,i] <- ssi
+    } else {
+      res <- ssi
+    }
     
   } # end iterative process
   
@@ -100,14 +112,13 @@
   
 }
 
-#' Utils function to calculate the Empirical Standardised Soil Moisture Index (ESSMI)
+#' Utils function to calculate the Snow Water Equivalent Index (SWEI)
 #'
 #' @param x Numerical vector.
-#' @param dates Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_essmi' function.
+#' @param dates Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_swei' function.
 #' @param scale Integer value that represents the time scale at which the ESSMI will be computed.
 #' @param missing_ratio Ratio of missing data that is acceptable for the computation. Set to 0.2 by default (20\%).
-#' @param ... Additional variables that can be used for the 'density' function.
-#' @return Numerical vector with the corresponding to the ESSMI
+#' @return Numerical vector with the corresponding to the SWEI
 #'
 #' @examples
 .swei <- function(x, 
@@ -120,7 +131,7 @@
   x_zoo <- zoo::rollapply(x_zoo, scale, fill = NA, FUN = sum, align = "right")
   
   # Obtaining the resulting unique steps
-  steps   <- substr(index(x_zoo), 6, 10)
+  steps   <- substr(zoo::index(x_zoo), 6, 10)
   u_steps <- unique(steps)
   
   # Calculating NAs in period
@@ -158,9 +169,10 @@
       pos_zero <- which(x_step == 0)
       
       if(length(pos_zero) > 0){
-        
-        min_val          <- x_step[-pos_zero] - min(x_step[-pos_zero], na.rm = TRUE) / 100
-        min_val          <- min(min_val, na.rm = TRUE)
+        suppressWarnings({
+          min_val          <- x_step[-pos_zero] - min(x_step[-pos_zero], na.rm = TRUE) / 100
+          min_val          <- min(min_val, na.rm = TRUE)
+      })
         x_step[pos_zero] <- min_val
       }
       
@@ -173,10 +185,17 @@
       
       # Ordering the vector in increasing form
       x_order <- order(x_step)
-      x_sort  <- x_step[x_order]
+      x_sort  <- round(x_step[x_order], 2)
+      
+      # Calculating the unique values of x_sort
+      x_sort_unique <- unique(x_sort)
       
       # Applying the empirical Gringorten plotting position
-      p_ami <- (1:length(x_sort)-0.44) / (length(x_sort) + 0.12)
+      p_ami <- (1:length(x_sort_unique)-0.44) / (length(x_sort_unique) + 0.12)
+      
+      # Matching equal values to x_sort
+      pos_equal_vals <- match(x_sort, x_sort_unique)
+      p_ami          <- p_ami[pos_equal_vals]
       
       # Applying the inverse standard normal distribution
       swei_ordered <- qnorm(p_ami)
@@ -195,7 +214,17 @@
       # Storing the standardized values
       res[which(is.infinite(res))] <- NA
       res[which(is.nan(res))]      <- NA
-      swei[pos_dates] <- res
+      
+      # Setting the values to NA if all values are zeros
+      if("min_val" %in% ls()){
+
+        if(length(min_val) < 1 | is.infinite(min_val))
+          res <- rep(NA, length(res))
+
+      }
+      
+      
+      suppressWarnings(swei[pos_dates] <- res)
       
     } # End for
     

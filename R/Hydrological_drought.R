@@ -73,17 +73,17 @@ ssi <- function(x,
 
 #' Snow Water Equivalent Index (SWEI)
 #'
-#' @param SM_data 'SpatRaster' object that contains spatially-distributed monthly soil moisture data that will be used to calculate the ESSMI. 
+#' @param SWE_data 'SpatRaster' object that contains spatially-distributed snow water equivalent data that will be used to calculate the SWEI. 
 #'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
 #'  of the terra package.
 #' @param scale Integer value that represents the time scale at which the ESSMI will be computed.
 #' @param start_month Optional value that represents the starting point of the period that will be returned from the Index.
 #'  The idea is not to return periods where SWE is not present. 
-#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The date should be introduced as '\%m-\%d'. For example: "02-01".
 #'  The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.
 #' @param end_month Optional value that represents the ending point of the period that will be returned from the Index.
 #'  The idea is not to return periods where SWE is not present. 
-#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The date should be introduced as '\%m-\%d'. For example: "02-01".
 #'  The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.
 #' @param missing_ratio Ratio of missing data that is acceptable for the computation. Set to 0.2 by default (20\%).
 #' @param ... Additional variables that can be used for the 'density' function.
@@ -99,7 +99,7 @@ spatial_swei <- function(SWE_data,
                          missing_ratio = 0.2,
                           ...){
   
-  # Check P_data
+  # Check SWE_data
   if(class(SWE_data) != "SpatRaster")
     stop("The object 'SWE_data' must be a SpatRaster")
   
@@ -115,6 +115,9 @@ spatial_swei <- function(SWE_data,
   if(class(end_month) != "character" & !is.null(end_month))
     stop("If object 'end_month' is not set to NULL, it must be a character object that indicates the ending point of the reference period used for computing the SPI. The format should be '%Y-%m'")
   
+  if(class(start_month) != class(end_month))
+    stop("The class of 'start_month' and 'end_month' must be the same (i.e., NULL or character)")
+  
   # Check start_month and end_month
   if(is.null(start_month) & !is.null(end_month))
     stop("The objects 'start_month' and 'end_month' should be either both NULL or both character!")
@@ -125,7 +128,7 @@ spatial_swei <- function(SWE_data,
   # Extract dates from object
   dates <- terra::time(SWE_data)
   
-  # Apply ESSMI
+  # Apply SWEI
   idx <- terra::app(SWE_data, .swei, scale = scale, dates = dates,
                     missing_ratio = missing_ratio)
   
@@ -135,10 +138,24 @@ spatial_swei <- function(SWE_data,
   
   # Avoid NaNs and infinite values
   idx[is.nan(idx)]      <- NA
-  # idx[is.infinite(idx)] <- NA
+  idx[is.infinite(idx)] <- NA
   
-  # ubset the selected months in the case that 'start_month' and 'end_month' are not NULL
-  ### TODOOOOOOOOOOOOOOOOOOO
+  # Subset the selected months in the case that 'start_month' and 'end_month' are not NULL
+  if(!is.null(start_month)){
+    
+    period   <- substr(dates, 6, 12)
+    u_period <- unique(period)
+    pos_ini  <- grep(start_month, u_period)
+    pos_fin  <- grep(end_month, u_period)
+    pos_per  <- u_period[pos_ini:pos_fin]
+    
+    final_pos <- which(period %in% pos_per)
+    idx       <- idx[[final_pos]]
+    
+  }
+  
+  # Masking regions full with zeroes where the computation of the index does
+  #  not make sense
   
   return(idx)
   

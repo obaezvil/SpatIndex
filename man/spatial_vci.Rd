@@ -4,7 +4,7 @@
 \alias{spatial_vci}
 \title{Vegetation Condition Index (VCI; Kogan 1995)}
 \usage{
-spatial_vci(NDVI_data)
+spatial_vci(NDVI_data, monthly = TRUE)
 }
 \arguments{
 \item{NDVI_data}{'SpatRaster' object that contains spatially-distributed NDVI data that will be used to calculate the VCI. 

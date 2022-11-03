@@ -112,7 +112,7 @@
 #' @export
 #'
 #' @examples
-.vci_period <- function(x, dates, ...){
+.tci_period <- function(x, dates, ...){
   
   # Convert the value in a zoo object
   x_zoo <- zoo::zoo(x, dates)

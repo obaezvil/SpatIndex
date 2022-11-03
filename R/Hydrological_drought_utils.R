@@ -130,6 +130,9 @@
   x_zoo <- zoo::zoo(x, dates)
   x_zoo <- zoo::rollapply(x_zoo, scale, fill = NA, FUN = sum, align = "right")
   
+  # Setting a threshold of 1mm 
+  x_zoo[x_zoo < 1] <- 0
+  
   # Obtaining the resulting unique steps
   steps   <- substr(zoo::index(x_zoo), 6, 10)
   u_steps <- unique(steps)
@@ -163,7 +166,7 @@
       
       # Extracting the data according to step 'i'
       pos_step   <- which(steps %in% u_steps[i])
-      x_step     <- x[pos_step]
+      x_step     <- x_zoo[pos_step]
       
       # Dealing with zero values (see Huning et al 2020: https://www.pnas.org/doi/epdf/10.1073/pnas.1915921117)
       pos_zero <- which(x_step == 0)

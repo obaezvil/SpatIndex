@@ -4,12 +4,13 @@
 \alias{spatial_vci}
 \title{Vegetation Condition Index (VCI; Kogan 1995)}
 \usage{
-spatial_vci(NDVI_data, monthly = TRUE)
+spatial_vci(NDVI_data, per_period = TRUE)
 }
 \arguments{
 \item{NDVI_data}{'SpatRaster' object that contains spatially-distributed NDVI data that will be used to calculate the VCI. 
 This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
-of the terra package.}
+of the terra package.
+@param per_period Should the results be calculated considering each period separately? Set to TRUE.}
 }
 \value{
 Spatially-distributed VCI values.

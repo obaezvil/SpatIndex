@@ -11,7 +11,7 @@ spatial_tci(BT_data)
 This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
 of the terra package.}
 
-\item{na.rm}{Should the NA values be removed? Set to TRUE.}
+\item{per_period}{Should the results be calculated considering each period separately? Set to TRUE.}
 }
 \value{
 Spatially-distributed TCI values.

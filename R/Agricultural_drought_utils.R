@@ -24,6 +24,9 @@
 #' @examples
 .vci <- function(x, ...){
   
+  # Removing negative NDVI values
+  x[x < 0] <- NA
+  
   # Applying VCI formula
   vci <- ( x - min(x, ...) ) / ( max(x, ...) - min(x, ...) ) * 100
   
@@ -34,6 +37,50 @@
   return(vci)
   
 }
+
+#' Utils function to calculate the Vegetation Condition Index per period
+#'
+#' @param x Numerical vector.
+#' @param dates Vector of dates passed from the parent function.
+#'
+#' @return Numerical vector with the corresponding to the VCI
+#' @export
+#'
+#' @examples
+.vci_period <- function(x, dates, ...){
+  
+  # Removing negative NDVI values
+  x[x < 0] <- NA
+  
+  # Convert the value in a zoo object
+  x_zoo <- zoo::zoo(x, dates)
+  
+  # Getting periods
+  period    <- substr(dates, 5, 10)
+  u_periods <- unique(period)
+  
+  # Creating empty vector
+  vci <- c()
+  
+  for(i in 1:length(u_periods)){
+    
+    # Storing position vector for each period
+    pos <- which(period %in% u_periods[i])
+    
+    # Extracting values for period and applying the VCI
+    period_vals <- x_zoo[pos]
+    vci[pos]    <- ( period_vals - min(period_vals, ...) ) / ( max(period_vals, ...) - min(period_vals, ...) ) * 100
+    
+  }
+
+  # Replace with NAs over areas with full NA vectors
+  if(length(vci) != length(x))
+    vci <- rep(NA, length(x))
+  
+  return(vci)
+  
+}
+
 
 #' Utils function to calculate the Temperature Condition Index
 #'
@@ -56,6 +103,45 @@
   
 }
 
+#' Utils function to calculate the Temperature Condition Index per period
+#'
+#' @param x Numerical vector.
+#' @param dates Vector of dates passed from the parent function.
+#'
+#' @return Numerical vector with the corresponding to the TCI
+#' @export
+#'
+#' @examples
+.vci_period <- function(x, dates, ...){
+  
+  # Convert the value in a zoo object
+  x_zoo <- zoo::zoo(x, dates)
+  
+  # Getting periods
+  period    <- substr(dates, 5, 10)
+  u_periods <- unique(period)
+  
+  # Creating empty vector
+  tci <- c()
+  
+  for(i in 1:length(u_periods)){
+    
+    # Storing position vector for each period
+    pos <- which(period %in% u_periods[i])
+    
+    # Extracting values for period and applying the VCI
+    period_vals <- x_zoo[pos]
+    tci[pos]    <- ( max(period_vals, ...) - period_vals ) / ( max(period_vals, ...) - min(period_vals, ...) ) * 100
+    
+  }
+  
+  # Replace with NAs over areas with full NA vectors
+  if(length(tci) != length(x))
+    tci <- rep(NA, length(x))
+  
+  return(tci)
+  
+}
 
 
 #' Utils function to calculate the Empirical Standardised Soil Moisture Index (ESSMI)

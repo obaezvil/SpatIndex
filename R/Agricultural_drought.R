@@ -18,11 +18,12 @@
 #' @param NDVI_data 'SpatRaster' object that contains spatially-distributed NDVI data that will be used to calculate the VCI. 
 #'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
 #'  of the terra package.
+#'  @param per_period Should the results be calculated considering each period separately? Set to TRUE.
 #' @return Spatially-distributed VCI values.
 #' @export
 #'
 #' @examples
-spatial_vci <- function(NDVI_data){
+spatial_vci <- function(NDVI_data, per_period = TRUE){
   
   # Check P_data
   if(class(NDVI_data) != "SpatRaster")
@@ -32,7 +33,12 @@ spatial_vci <- function(NDVI_data){
   dates <- terra::time(NDVI_data)
   
   # Apply VCI
-  idx <- terra::app(NDVI_data, .vci, na.rm = TRUE)
+  if(per_period){
+    idx <- terra::app(NDVI_data, .vci_period,  dates, na.rm = TRUE)
+    
+  } else {
+    idx <- terra::app(NDVI_data, .vci, na.rm = TRUE)
+  }
   
   ## set dates and return
   names(idx)        <- paste0(substr(dates, 1, 7)) 
@@ -45,12 +51,13 @@ spatial_vci <- function(NDVI_data){
   
 }
 
+
 #' Temperature Condition Index (TCI; Kogan 1995)
 #'
 #' @param BT_data 'SpatRaster' object that contains spatially-distributed Brightness Temperature (BT) data that will be used to calculate the TCI. 
 #'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
 #'  of the terra package.
-#' @param na.rm Should the NA values be removed? Set to TRUE.
+#' @param per_period Should the results be calculated considering each period separately? Set to TRUE.
 #' @return Spatially-distributed TCI values.
 #' @export
 #'
@@ -65,7 +72,12 @@ spatial_tci <- function(BT_data){
   dates <- terra::time(BT_data)
   
   # Apply TCI
-  idx <- terra::app(BT_data, .tci, na.rm = TRUE)
+  if(per_period){
+    idx <- terra::app(BT_data, .tci_period,  dates, na.rm = TRUE)
+    
+  } else {
+    idx <- terra::app(BT_data, .tci, na.rm = TRUE)
+  }
   
   ## set dates and return
   names(idx)        <- paste0(substr(dates, 1, 7)) 

@@ -62,7 +62,7 @@ spatial_vci <- function(NDVI_data, per_period = TRUE){
 #' @export
 #'
 #' @examples
-spatial_tci <- function(BT_data){
+spatial_tci <- function(BT_data, per_period = TRUE){
   
   # Check P_data
   if(class(BT_data) != "SpatRaster")

@@ -4,7 +4,7 @@
 \alias{spatial_tci}
 \title{Temperature Condition Index (TCI; Kogan 1995)}
 \usage{
-spatial_tci(BT_data)
+spatial_tci(BT_data, per_period = TRUE)
 }
 \arguments{
 \item{BT_data}{'SpatRaster' object that contains spatially-distributed Brightness Temperature (BT) data that will be used to calculate the TCI. 

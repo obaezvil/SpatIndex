@@ -82,8 +82,15 @@
   # Creating an object to store the SSI data
   res <- x
   
+  # Defining number of columns
+  if(is.null(ncol(x))){
+    col <- 1
+  } else {
+    col <- ncol(x)
+  }
+  
   # Iterating for every time series in x
-  for(i in 1:ncol(x)){
+  for(i in 1:col){
     
     # Subsetting the data
     val <- as.numeric(x[,i])

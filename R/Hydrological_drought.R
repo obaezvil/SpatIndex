@@ -64,6 +64,7 @@ ssi <- function(x,
   
   # Apply the SSI
   idx <- .ssi(x, scale = scale, ref_start = ref_start, ref_end = ref_end, distribution = distribution)
+  idx <-zoo::zoo(idx, dates)
 
   return(idx)
   

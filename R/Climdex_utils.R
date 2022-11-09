@@ -165,6 +165,9 @@
   
   rs  <- s / v
   
+  # Setting indeterminate values to zero
+  rs[rs == Inf] <- 0
+  
   return(rs)
   
 }

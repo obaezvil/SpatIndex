@@ -278,3 +278,57 @@
   return(essmi)
 
 }
+
+#' Utils function to calculate the z-score
+#'
+#' @param x Numerical vector.
+#' @param dates Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_zscore' function.
+#' @return Numerical vector with the corresponding to the zFAPAR
+#'
+#' @examples
+.zscore <- function(x,
+                    dates){
+  
+  # Applying the accumulation according to scale
+  x_zoo <- zoo::zoo(x, dates)
+  
+  # Obtaining the resulting unique steps
+  steps   <- substr(dates, 6, 10)
+  u_steps <- unique(steps)
+  
+  # Conditional: if all values are NAs, return NAs (masked regions or oceans)
+  if(length(x_zoo) == length(which(is.na(x_zoo)))){
+    
+    zsc <- rep(NA, length(x_zoo))
+    
+  } else {
+    
+    # Creating an object to store the resulting data
+    zsc <- c()
+    
+    #######
+    ####### Loop to evaluate each one of the time steps
+    #######
+    
+    for(i in 1:length(u_steps)){
+      
+      # Extracting the data according to step 'i'
+      pos_step   <- which(steps %in% u_steps[i])
+      x_step     <- x_zoo[pos_step]
+      
+      # Calculating components of z-score
+      x_mean <- mean(x_step, na.rm = TRUE)
+      x_sd   <- sd(x_step, na.rm = TRUE)
+      
+      # Calculating z-score for step 'i'
+      zsc[pos_step] <- (x_step - x_mean) / x_sd
+      
+    } # end for
+    
+    
+  } # end else
+  
+  # Returning resulting object
+  return(zsc)
+  
+}

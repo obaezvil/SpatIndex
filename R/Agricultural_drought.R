@@ -263,3 +263,38 @@ spatial_essmi <- function(SM_data,
   return(idx)
   
 }
+
+#' Anomaly Index (zscore)
+#'
+#' @param Var_data 'SpatRaster' object that contains spatially-distributed data that will be used to calculate the zscore. 
+#'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
+#'  of the terra package.
+#'
+#' @return Spatially-distributed zfAPAR values.
+#' @export
+#'
+#' @examples
+spatial_zscore <- function(Var_data){
+  
+  # Check P_data
+  if(class(Var_data) != "SpatRaster")
+    stop("The object 'Var_data' must be a SpatRaster")
+ 
+  # Extract dates from object
+  dates <- terra::time(Var_data)
+  
+  # Apply zscore
+  idx <- terra::app(Var_data, .zscore, dates = dates)
+ 
+  ## set dates and return
+  names(idx)        <- paste0(substr(dates, 1, 7)) 
+  terra::time(idx)  <- dates
+  
+  # Avoid NaNs and infinite values
+  idx[is.nan(idx)]      <- NA
+  # idx[is.infinite(idx)] <- NA
+  
+  return(idx)
+  
+}
+

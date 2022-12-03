@@ -59,7 +59,7 @@ mk_spatial <- function(rst,
   names(mk) <- c("p-value", "Kendall_Score-S", "Variance_of_Kendall_Score-varS", "Tau")
   
   # Applying the Sen's Slope
-  ss <- terra::app(rst, .Senslope, conf.level = conf_level)
+  ss <- terra::app(rst, .Senslope, conflevel = conf_level)
   
   # Setting names of reult layers
   names(ss) <- c("Sen's_Slope", "Total_change")
@@ -81,11 +81,13 @@ mk_spatial <- function(rst,
   
   if(length(points) < 1){
     warning("The 'Significant_points' layer was not generated because any p-value < ", p_thres, "!")
+    
     results <- list(gridded = results,
-                    vector = NULL)
+                    sig_points = NULL)
   } else {
+    
     results <- list(gridded = results,
-                    vector = points)
+                    sig_points = points)
   }
 
   return(results)
@@ -124,19 +126,19 @@ mk_spatial <- function(rst,
 #' Utils function that calculates the Sen's slope
 #'
 #' @param x numerical vector.
-#' @param conf_level Level of significance. Set to 0.95 by default.
+#' @param conflevel Level of significance. Set to 0.95 by default.
 #'
 #' @return
 #' @export
 #'
 #' @examples
-.Senslope <- function(x, conf_level = 0.95){
+.Senslope <- function(x, conflevel){
   
   # Condition to deal with NA values
   if(!any(is.na(x))){
     
     # Calculating the Sen's Slope
-    ss     <- trend::sens.slope(x, conf.level = conf_level)
+    ss     <- trend::sens.slope(x, conf.level = conflevel)
     ss     <- as.numeric(ss$estimates)
     change <- ss * length(x)
     
@@ -147,3 +149,4 @@ mk_spatial <- function(rst,
   return(as.numeric(c(ss, change)))
   
 }
+

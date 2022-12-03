@@ -4,12 +4,12 @@
 \alias{.Senslope}
 \title{Utils function that calculates the Sen's slope}
 \usage{
-.Senslope(x, conf_level = 0.95)
+.Senslope(x, conflevel)
 }
 \arguments{
 \item{x}{numerical vector.}
 
-\item{conf_level}{Level of significance. Set to 0.95 by default.}
+\item{conflevel}{Level of significance. Set to 0.95 by default.}
 }
 \description{
 Utils function that calculates the Sen's slope

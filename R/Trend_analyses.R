@@ -9,6 +9,7 @@
 ################################################################################
 ##
 ## Creation date: 2022-05-13
+## Updated: 2022-12-03
 ##
 ################################################################################
 ################################################################################
@@ -34,7 +35,7 @@ mk_spatial <- function(rst,
                        p_thres = 0.05){
   
   # Controlling the class of the object
-  !if(class(rst) %in% c("SpatRaster", "RasterBrick", "RasterStack"))
+  if(!class(rst) %in% c("SpatRaster", "RasterBrick", "RasterStack"))
     stop("The object 'rst' must have class 'SpatRaster', 'RasterBrick', or 'RasterStack'!")
   
   # Checking the 'vct' object

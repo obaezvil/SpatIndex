@@ -1,37 +1,10 @@
 # SpatIndex <img src="./inst/logos/SpatIndex.png" align="right" width="150" />
 
-Spatial indices to monitor global change 
+Spatial indices to monitor droughts and global change 
 
-Simple way of computing hydroclimatological indices in R. The users are able to compute state-of-the-art indices by providing the file path to daily tiff files.
+This R package provides a simple way of computing spatially-distributed drought and extreme indices. The users are able to compute meteorological, agricultural, and hydrological indices as well as the extreme CLIMDEX just by providing raster files of the required hydroclimatological variables. The drought and extreme indices that are implemented in **SpatIndex** are sumarised in the following figure:
 
-The indices included in this package to date are:
-
-- **Rx1day**: Maximum 1-day precipitation
-
-- **Rx5day**: Maximum consecutive 5-day precipitation
-
-- **SDII**: Simple precipitation intensity index
-
-- **R10mm**: Annual count of days when PRCP ≥ 10mm
-
-- **R20mm**: Annual count of days when PRCP ≥ 20mm
-
-- **Rnnmm**: Annual count of days when PRCP ≥ nn mm, where nn is a user-defined threshold
-
-- **CDD**: Maximum length of dry spell: maximum number of consecutive days with RR < 1mm
-
-- **CWD**: Maximum length of wet spell: maximum number of consecutive days with RR ≥ 1mm
-
-- **R95p**: Annual total PRCP when RR > 95th percentile
-
-- **R99p**: Annual total PRCP when RR > 99th percentile
-
-- **R95pTOT**: Contribution to total precipitation from very wet days
-
-- **R99pTOT**: Contribution to total precipitation from extremely wet days
-
-- **PRCPTOT**: Annual total precipitation on wet days
-
+<img src="./inst/logos/Fig_indices.png" align="center" width="1000" />
 
 ### Installation
 

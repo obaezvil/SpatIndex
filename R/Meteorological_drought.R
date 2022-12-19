@@ -123,7 +123,7 @@ spatial_spi <- function(P_data,
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
 #' @param na.rm Should the NA values be removed? Set to TRUE.
-#' #' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
+#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
 #' @param ... Additional variables that can be used for the 'spi' function of the SPEI package.
 #'
 #' @return Spatially-distributed SPEI values.
@@ -292,3 +292,145 @@ spatial_pni <- function(P_data){
   return(idx)
   
 }
+
+
+
+#' Standardised precipitation index calculated for a specific day.
+#'
+#' @param Prod_data 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
+#'   This object contains the daily accumulated values of a specific day according to the scale provided. This object can be computed with
+#'   the 'spi_agregate_daily' function.
+#'   This 'SpatRaster' must only contain the days that corresponds to the specific selection.
+#' @param trgt The day for which the function will be computed. The default is NULL, indicating that the last day of the data
+#'  will be used to return the SPI values.
+#' @param ref_start optional value that represents the starting point of the reference period used for computing the index. 
+#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.
+#' @param ref_end Optional value that represents the ending point of the reference period used for computing the index. 
+#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.
+#' @param distribution Optional value indicating the name of the distribution function to be used for computing the SPI 
+#'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
+#' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
+#'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
+#'
+#' @return This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
+#'    has to be created before, which can be achieved with the 'spi.agregate_daily' function. 
+#' @export
+#'
+#' @examples
+daily_spi <- function(Prod_data,  
+                      trgt = NULL, 
+                      ref_start = NULL,
+                      ref_end = NULL, 
+                      distribution = "Gamma", 
+                      fit = "ub-pwm",
+                      package = "SCI"){
+  
+  # Check Prod_data
+  if(class(Prod_data) != "SpatRaster")
+    stop("The object 'Prod_data' must be a SpatRaster")
+  
+  # Extract dates from Prod_data object
+  dates <- terra::time(Prod_data)
+  
+  if(is.null(trgt))
+    trgt <- dates[length(dates)]
+  
+  # Evaluate the 'trgt' element
+  if(!is.null(trgt) & !as.Date(trgt) %in% dates)
+    stop("The 'trgt' date should be included in 'Prod_data'.")
+  
+  # Check ref_start object
+  if(class(ref_start) != "character" & !is.null(ref_start))
+    stop("If object 'ref_start' is not set to NULL, it must be a character object that indicates the starting point of the reference period used for computing the SPEI. The format should be '%Y-%m'")
+  
+  # Check ref_end object
+  if(class(ref_end) != "character" & !is.null(ref_end))
+    stop("If object 'ref_end' is not set to NULL, it must be a character object that indicates the ending point of the reference period used for computing the SPEI. The format should be '%Y-%m'")
+  
+  # Check ref_start and ref_end
+  if(is.null(ref_start) & !is.null(ref_end))
+    stop("The objects 'ref_start' and 'ref_end' should be either both NULL or both character!")
+  
+  if(!is.null(ref_start) & is.null(ref_end))
+    stop("The objects 'ref_start' and 'ref_end' should be either both NULL or both character!")
+  
+  # Checking the 'package' object
+  if(!package %in% c("SPEI", "SCI"))
+    stop("The 'package' object must be either 'SPEI' or 'SCI'")
+  
+  # Apply daily SPI
+  if(package == "SPEI"){
+    
+    idx <- terra::app(Prod_data, .spei_daily.spei, trgt = trgt, dates = dates, 
+                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, fit = fit)
+    
+  } else {
+    
+    idx <- terra::app(Prod_data, .spei_daily.sci, trgt = trgt, dates = dates, 
+                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, fit = fit)
+    
+  }
+  
+  # Apply the daily SPEI
+  
+  
+  ## set dates and return
+  names(idx)        <- paste0(substr(trgt, 1, 7)) 
+  terra::time(idx)  <- as.Date(trgt)
+  
+  # Avoid NaNs and infinite values
+  idx[is.nan(idx)]      <- NA
+  idx[is.infinite(idx)] <- NA
+  
+  return(idx)
+  
+}
+
+
+#' Standardised precipitation evapotranspiration index calculated for a specific day. 
+#'  This function is a wrapper function of daily.spi
+#'
+#' @param Prod_data 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
+#'   This object contains the daily accumulated values of a specific day according to the scale provided. This object can be computed with
+#'   the 'spi_agregate_daily' function.
+#'   This 'SpatRaster' must only contain the days that corresponds to the specific selection.
+#' @param trgt The day for which the function will be computed. The default is NULL, indicating that the last day of the data
+#'  will be used to return the SPI values.
+#' @param ref_start optional value that represents the starting point of the reference period used for computing the index. 
+#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.
+#' @param ref_end Optional value that represents the ending point of the reference period used for computing the index. 
+#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
+#'  The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.
+#' @param distribution Optional value indicating the name of the distribution function to be used for computing the SPI 
+#'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
+#' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
+#'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
+#'
+#' @return
+#' @export
+#'
+#' @examples
+daily_spei <- function(Prod_data,  
+                      trgt = NULL, 
+                      ref_start = NULL,
+                      ref_end = NULL, 
+                      distribution = "log-Logistic", 
+                      fit = "ub-pwm",
+                      package = "SCI"){
+  
+ idx <- daily.spi(Prod_data, trgt = trgt, ref_start = ref_start, 
+                  ref_end = ref_end, distribution = distribution, fit = fit)
+  
+
+  return(idx)
+  
+}
+
+
+
+

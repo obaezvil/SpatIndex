@@ -317,13 +317,14 @@
 #'  This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can be set with the function time
 #'  of the terra package.
 #' @param scale Integer value that represents the time scale at which the SPI will be computed.
-#'
+#' @param trgt The day for which the function will be computed. The default is NULL, indicating that the last day of the data
+#'  will be selected.
 #' @return This function returns a 'SpatRaster' of the specific date (e.g., "%Y-02-28") according to the defined scale, defined as a 30-day 
 #'   accumulation period (e.g., scale = 3, accumulates the specific date plus the previous 89 days).
 #' @export
 #'
 #' @examples
-spi_agregate_daily <- function(Prod_data, 
+aggregate_days4spi <- function(Prod_data, 
                                scale, 
                                trgt = NULL){
   

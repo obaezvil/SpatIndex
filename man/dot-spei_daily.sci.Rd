@@ -5,7 +5,7 @@
 \title{Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SCI package
  obtained from  https://github.com/cran/SCI/blob/master/R/sci.r}
 \usage{
-.spei_daily.sci(x, trgt, dates, ref_start, ref_end, distribution, fit)
+.spei_daily.sci(x, trgt, dates, ref_start, ref_end, distribution, fit, params)
 }
 \arguments{
 \item{x}{Numerical vector.}
@@ -28,6 +28,8 @@ The default is NULL, which indicates that the last layer in the 'SpatRaster' wil
 
 \item{fit}{Optional value indicating the name of the method used for computing the distribution function parameters 
 (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.}
+
+\item{params}{Should the parameters of the selected distributions be returned? Set to FALSE as the default.}
 }
 \description{
 Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SCI package

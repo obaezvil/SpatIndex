@@ -5,7 +5,7 @@
 \title{Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SPEI package
  from 'sbegueria' https://github.com/sbegueria/SPEI/blob/master/R/spei.R}
 \usage{
-.spei_daily.spei(x, trgt, dates, ref_start, ref_end, distribution, fit)
+.spei_daily.spei(x, trgt, dates, ref_start, ref_end, distribution, fit, params)
 }
 \arguments{
 \item{x}{Numerical vector.}
@@ -27,7 +27,8 @@ The default is NULL, which indicates that the last layer in the 'SpatRaster' wil
 (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.}
 
 \item{fit}{Optional value indicating the name of the method used for computing the distribution function parameters 
-(one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.}
+(one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+@param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.}
 }
 \description{
 Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SPEI package

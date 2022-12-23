@@ -11,6 +11,7 @@ daily_spi(
   ref_end = NULL,
   distribution = "Gamma",
   fit = "ub-pwm",
+  params = FALSE,
   package = "SCI"
 )
 }
@@ -35,7 +36,8 @@ The default is NULL, which indicates that the last layer in the 'SpatRaster' wil
 (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.}
 
 \item{fit}{Optional value indicating the name of the method used for computing the distribution function parameters 
-(one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.}
+(one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+@param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.}
 
 \item{package}{Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?}
 }

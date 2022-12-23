@@ -399,6 +399,7 @@ aggregate_days4spi <- function(Prod_data,
 #'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+#'  @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
 #'
 #' @return
 #'
@@ -409,7 +410,8 @@ aggregate_days4spi <- function(Prod_data,
                              ref_start,
                              ref_end,
                              distribution,
-                             fit){
+                             fit,
+                             params){
   
   # Checking distribution
   if(!distribution %in% c("Gamma", "log-Logistic", "PearsonIII"))
@@ -456,8 +458,8 @@ aggregate_days4spi <- function(Prod_data,
   ################################
   
   # Analysing the NA values
-  f  <- acu_ref[!is.na(acu_ref)]
-  ff <- acu[!is.na(acu)]
+  f     <- acu_ref[!is.na(acu_ref)]
+  ff    <- acu[!is.na(acu)]
   x_mon <- f
   
   # Probability of zero (pze)
@@ -474,15 +476,18 @@ aggregate_days4spi <- function(Prod_data,
   # Condition to evaluate the length of values in x_mon                                               
   if (length(x_mon) < 4) {
     
-    res <- NA
-    
+    val      <- NA
+    f_params <- coef[,,1]
+      
   } else if (is.na(x_mon_sd) || (x_mon_sd == 0)){
     
-    res <-NA
+    val      <- NA
+    f_params <- coef[,,1]
     
   } else if (length(na.omit(x_mon)) == 0){
     
-    res <-NA
+    val      <- NA
+    f_params <- coef[,,1]
     
   } else {
     
@@ -551,10 +556,20 @@ aggregate_days4spi <- function(Prod_data,
       val <- NA
     }
     
-    return(val)
+  }
+  
+  # Retrieving the parameters of the distribution
+  if(params){
+    
+    # Converting the parameter beta into the rate parameter (rate = 1 / Beta)
+    if(distribution == "Gamma")
+      f_params[2] <- 1 /f_params[2]
+    
+    val <- c(as.numeric(val), f_params)
     
   }
   
+  return(val)
   
 }
 
@@ -576,6 +591,7 @@ aggregate_days4spi <- function(Prod_data,
 #'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+#' @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
 #'
 #' @return
 #'
@@ -586,7 +602,8 @@ aggregate_days4spi <- function(Prod_data,
                             ref_start,
                             ref_end,
                             distribution,
-                            fit){
+                            fit,
+                            params){
   
   # Saving the raw data in an object
   x_all <- x
@@ -747,6 +764,7 @@ aggregate_days4spi <- function(Prod_data,
               call=match.call())
   
   class(obj) <- "fitSCI"
+  f_params   <- obj$dist.para
   
   ####
   # Predicting the values based on the op object (probability based on fitted
@@ -794,6 +812,17 @@ aggregate_days4spi <- function(Prod_data,
     
     val <- res[length(res)]
     
+  }
+  
+  # Retrieving the parameters of the distribution
+  if(params){
+    
+    pos <- which(rownames(f_params) == "P0")
+    if(length(pos) > 0)
+      f_params <- f_params[-pos,]
+    
+    val <- c(as.numeric(val), as.numeric(f_params))
+  
   }
   
   return(val)

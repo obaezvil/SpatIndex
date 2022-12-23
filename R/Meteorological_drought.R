@@ -313,6 +313,7 @@ spatial_pni <- function(P_data){
 #'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+#'  @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
 #' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
 #'
 #' @return This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
@@ -326,6 +327,7 @@ daily_spi <- function(Prod_data,
                       ref_end = NULL, 
                       distribution = "Gamma", 
                       fit = "ub-pwm",
+                      params = FALSE,
                       package = "SCI"){
   
   # Check Prod_data
@@ -365,26 +367,40 @@ daily_spi <- function(Prod_data,
   if(package == "SPEI"){
     
     idx <- terra::app(Prod_data, .spei_daily.spei, trgt = trgt, dates = dates, 
-                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, fit = fit)
+                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, 
+                      fit = fit, params = params)
     
   } else {
     
     idx <- terra::app(Prod_data, .spei_daily.sci, trgt = trgt, dates = dates, 
-                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, fit = fit)
+                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, 
+                      fit = fit, params = params)
     
   }
   
-  # Apply the daily SPEI
-  
-  
   ## set dates and return
-  names(idx)        <- paste0(substr(trgt, 1, 7)) 
-  terra::time(idx)  <- as.Date(trgt)
+  terra::time(idx)  <- rep(as.Date(trgt), terra::nlyr(idx))
   
   # Avoid NaNs and infinite values
   idx[is.nan(idx)]      <- NA
   idx[is.infinite(idx)] <- NA
   
+  # Adding information in case that 'params' is set to true
+  if(params){
+    
+    names <- switch(distribution,
+                    "Gamma" = c('shape','rate'),
+                    "PearsonIII" = c('mu','sigma','gamma'),
+                    "log-Logistic" = c('xi','alpha','kappa')
+    )
+    
+    
+    names(idx) <- c("Values", names)
+    
+  } else {
+    names(idx)  <- paste0(substr(trgt, 1, 7)) 
+  }
+
   return(idx)
   
 }
@@ -409,6 +425,7 @@ daily_spi <- function(Prod_data,
 #'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+#'  @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
 #' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
 #'
 #' @return
@@ -421,10 +438,11 @@ daily_spei <- function(Prod_data,
                       ref_end = NULL, 
                       distribution = "log-Logistic", 
                       fit = "ub-pwm",
+                      params = FALSE,
                       package = "SCI"){
   
  idx <- daily.spi(Prod_data, trgt = trgt, ref_start = ref_start, 
-                  ref_end = ref_end, distribution = distribution, fit = fit)
+                  ref_end = ref_end, distribution = distribution, fit = fit, params = params)
   
 
   return(idx)

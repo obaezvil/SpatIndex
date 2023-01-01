@@ -536,6 +536,62 @@ calculate_params <- function(P_data,
 }
 
 
+#' Kalman smoothing to daily SPI and SPEI parameters
+#'
+#' @param params_list List object that contain as many 'SparRaster' objects as parameters in the selected distribution.
+#'    This list must contain the names of the parameters. Please see the 'calculate_params' function.
+#' @param H Covariance matrix or array of disturbance terms \epsilon_tϵ of observation equations. See the KFAS package.
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+kalman_parameters <- function(params_list, H, ...){
+  
+  # Checking that param_list is a list
+  if(!is.list(params_list))
+    stop("The object 'params_list' must be a list")
+  
+  # Checking that contains 'SpatRaster' objects
+  class <- summary(params_list)
+  class <- unique(class[,2])
+  if(!length(class) == 1 | !class == "SpatRaster")
+    stop("The object 'params_list' must only contain SpatRaster objects!")
+  
+  # Checking the object H
+  if(!is.numeric(H))
+    stop("The parameter 'H' must be numeric")
+  
+  # Checking length of H
+  if(!(length(H) == 1 | length(H) == length(params_list)))
+    stop("The length of the parameter 'H' must be either 1 or equal to the number of parameters")
+  
+  # Applying the filter for every parameter
+  parameters <- names(params_list)
+  res        <- list()
+  
+  for(i in 1:length(parameters)){
+    
+    # Checking parameter H
+    H_iter <- H[1]
+    if(length(H) == length(params_list))
+      H_iter <- H[i]
+    
+    res[[i]] <- terra::app(params_list[[i]], .kalman_filter, H = H_iter, ...)
+    
+  }
+  
+  # Setting the names to the smoothed parameters
+  names(res) <- parameters
+  
+  return(res)
+  
+  
+}
+
+
+
 
 
 

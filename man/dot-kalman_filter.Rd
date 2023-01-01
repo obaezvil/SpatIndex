@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{Numerical vector.}
 
-\item{H}{Covariance matrix or array of disturbance terms \epsilon_tϵ of observation equations}
+\item{H}{Covariance matrix or array of disturbance terms \epsilon_tϵ of observation equations.}
 
 \item{...}{}
 }

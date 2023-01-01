@@ -823,15 +823,14 @@ aggregate_days4spi <- function(Prod_data,
 #' Utils function to apply Kalman filter
 #'
 #' @param x Numerical vector.
-#' @param H Covariance matrix or array of disturbance terms \epsilon_tϵ of observation equations
+#' @param H Covariance matrix or array of disturbance terms \epsilon_tϵ of observation equations.
 #' @param ... 
 #'
 #' @return
-#' @export
 #'
 #' @examples
 .kalman_filter <- function(x, H, ...){
-  require(KFAS)
+  suppressMessages(require(KFAS))
   
   if(!all(is.na(x))){
     

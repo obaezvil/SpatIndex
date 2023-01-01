@@ -543,7 +543,7 @@ calculate_params <- function(P_data,
 #' @param H Covariance matrix or array of disturbance terms \epsilon_tϵ of observation equations. See the KFAS package.
 #' @param ... 
 #'
-#' @return
+#' @return The smoothed parameters in a list.
 #' @export
 #'
 #' @examples
@@ -569,6 +569,7 @@ kalman_parameters <- function(params_list, H, ...){
   
   # Applying the filter for every parameter
   parameters <- names(params_list)
+  dates      <- terra::time(params_list[[1]])
   res        <- list()
   
   for(i in 1:length(parameters)){
@@ -578,8 +579,10 @@ kalman_parameters <- function(params_list, H, ...){
     if(length(H) == length(params_list))
       H_iter <- H[i]
     
-    res[[i]] <- terra::app(params_list[[i]], .kalman_filter, H = H_iter, ...)
-    
+    res[[i]]              <- terra::app(params_list[[i]], .kalman_filter, H = H_iter, ...)
+    terra::time(res[[i]]) <- dates
+    names(res[[i]])       <- dates
+  
   }
   
   # Setting the names to the smoothed parameters

@@ -14,6 +14,9 @@ This list must contain the names of the parameters. Please see the 'calculate_pa
 
 \item{...}{}
 }
+\value{
+The smoothed parameters in a list.
+}
 \description{
 Kalman smoothing to daily SPI and SPEI parameters
 }

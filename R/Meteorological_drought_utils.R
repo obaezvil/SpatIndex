@@ -161,9 +161,6 @@
   
 }
 
-
-
-
 #' Utils function to calculate the SPEI (SPEI package)
 #'
 #' @param x Numerical vector.
@@ -821,6 +818,32 @@ aggregate_days4spi <- function(Prod_data,
   return(f_params)
   
   
+}
+
+#' Utils function to apply Kalman filter
+#'
+#' @param x Numerical vector.
+#' @param H Covariance matrix or array of disturbance terms \epsilon_tϵ of observation equations
+#' @param ... 
+#'
+#' @return
+#' @export
+#'
+#' @examples
+.kalman_filter <- function(x, H, ...){
+  require(KFAS)
+  
+  if(!all(is.na(x))){
+    
+    # Creating a state space object
+    mod <- KFAS::SSModel(x ~ SSMtrend(1, Q = 0.01), H = H, ...)
+    out <- KFAS::KFS(mod)
+    res <- as.numeric(out$alphahat)
+  } else {
+    res <- rep(NA, length(x))
+  }
+
+  return(res)
 }
 
 #' Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SPEI package

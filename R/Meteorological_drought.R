@@ -539,6 +539,7 @@ calculate_params <- function(P_data,
 
 
 
+
 #' Standardised precipitation index calculated for a specific day.
 #'
 #' @param Prod_data 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).

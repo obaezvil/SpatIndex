@@ -470,13 +470,13 @@ params_spei <- function(Prod_data,
 #' @export
 #'
 #' @examples
-params_spi <- function(P_data,  
-                       scale,
-                       ref_start = NULL,
-                       ref_end = NULL, 
-                       distribution, 
-                       fit = "ub-pwm",
-                       package = "SCI"){
+calculate_params <- function(P_data,  
+                             scale,
+                             ref_start = NULL,
+                             ref_end = NULL, 
+                             distribution, 
+                             fit = "ub-pwm",
+                             package = "SCI"){
   
   # Setting values to be used in the iteration process
   dates   <- terra::time(P_data)
@@ -512,13 +512,26 @@ params_spi <- function(P_data,
     res[[i]] <- params_spi(Prod_data, trgt = target, ref_start = ref_start, 
                         ref_end = ref_end, distribution = distribution, fit = fit, package = package)
     
-    cat("Done! \n")
+    cat(" Done! \n")
   }
   
   # Stacking the list
   res <-terra::rast(res)
   
-  return(res)
+  # Getting the names of the parameters
+  param_names <- unique(names(res))
+  
+  sep_params <- list()
+  for(i in 1:length(param_names)){
+    
+    sep_params[[i]] <- res[[which(names(res) %in% param_names[i])]]
+    
+  }
+  
+  # Setting the manes of the list
+  names(sep_params) <- param_names
+  
+  return(sep_params)
   
 }
 

@@ -13,6 +13,7 @@ Imports:
     fitdistrplus,
     hydroTSM,
     imputeTS,
+    KFAS,
     lmom,
     lmomco,
     RcppRoll,

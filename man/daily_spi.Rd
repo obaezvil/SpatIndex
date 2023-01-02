@@ -4,47 +4,28 @@
 \alias{daily_spi}
 \title{Standardised precipitation index calculated for a specific day.}
 \usage{
-daily_spi(
-  Prod_data,
-  trgt = NULL,
-  ref_start = NULL,
-  ref_end = NULL,
-  distribution = "Gamma",
-  fit = "ub-pwm",
-  params = FALSE,
-  package = "SCI"
-)
+daily_spi(param_list, P_lyr)
+
+daily_spi(param_list, P_lyr)
 }
 \arguments{
-\item{Prod_data}{'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
+\item{param_list}{A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.}
+
+\item{P_lyr}{'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
 This object contains the daily accumulated values of a specific day according to the scale provided. This object can be computed with
 the 'spi_agregate_daily' function.
 This 'SpatRaster' must only contain the days that corresponds to the specific selection.}
-
-\item{trgt}{The day for which the function will be computed. The default is NULL, indicating that the last day of the data
-will be used to return the SPI values.}
-
-\item{ref_start}{optional value that represents the starting point of the reference period used for computing the index. 
-The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.}
-
-\item{ref_end}{Optional value that represents the ending point of the reference period used for computing the index. 
-The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.}
-
-\item{distribution}{Optional value indicating the name of the distribution function to be used for computing the SPI 
-(one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.}
-
-\item{fit}{Optional value indicating the name of the method used for computing the distribution function parameters 
-(one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
-@param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.}
-
-\item{package}{Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?}
 }
 \value{
+This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
+   has to be created before, which can be achieved with the 'spi.agregate_daily' function.
+
 This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
    has to be created before, which can be achieved with the 'spi.agregate_daily' function.
 }
 \description{
 Standardised precipitation index calculated for a specific day.
+
+Standardised precipitation evapotranspiration index calculated for a specific day. 
+ This function is a wrapper function of daily.spi
 }

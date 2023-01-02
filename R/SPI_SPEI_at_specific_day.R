@@ -556,8 +556,3 @@ read_parameters <- function(dir, folder_name = NULL){
   
   return(params_list)
 }
-
-
-
-
-

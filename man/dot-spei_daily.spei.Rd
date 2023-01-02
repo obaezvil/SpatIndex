@@ -5,30 +5,20 @@
 \title{Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SPEI package
  from 'sbegueria' https://github.com/sbegueria/SPEI/blob/master/R/spei.R}
 \usage{
-.spei_daily.spei(x, trgt, dates, ref_start, ref_end, distribution, fit, params)
+.spei_daily.spei(params_matrix, P_matrix, pze_matrix, trgt, distribution)
 }
 \arguments{
-\item{x}{Numerical vector.}
+\item{params_matrix}{matrix obtained from the parameters list}
+
+\item{P_matrix}{matrix of the required P layer}
+
+\item{pze_matrix}{matrix of the probability of zero layer}
 
 \item{trgt}{The day for which the function will be computed. The default is NULL, indicating that the last day of the data
 will be selected.}
 
-\item{dates}{Vector of dates that is extracted from the 'SpatRaster' in the 'spatial_spei' function.}
-
-\item{ref_start}{optional value that represents the starting point of the reference period used for computing the index. 
-The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.}
-
-\item{ref_end}{Optional value that represents the ending point of the reference period used for computing the index. 
-The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.}
-
-\item{distribution}{Optional value indicating the name of the distribution function to be used for computing the SPI 
+\item{distribution}{Character value indicating the name of the distribution function to be used for computing the SPI 
 (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.}
-
-\item{fit}{Optional value indicating the name of the method used for computing the distribution function parameters 
-(one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
-@param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.}
 }
 \description{
 Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SPEI package

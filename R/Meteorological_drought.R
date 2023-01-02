@@ -508,6 +508,12 @@ calculate_params <- function(P_data,
     # Computing the accumulations
     Prod_data <- aggregate_days4spi(P_data, scale = scale, trgt = target)
     
+    # Calculating the probability of zero
+    ref_period <- c(ref_start, ref_end)
+    if(is.null(ref_period))
+      ref_period <- "None"
+    pze        <- terra::app(Prod_data, .calculate_pze, ref_period = ref_period, dates = dates)
+    
     # Calculating the parameters for the respective day
     res[[i]] <- params_spi(Prod_data, trgt = target, ref_start = ref_start, 
                         ref_end = ref_end, distribution = distribution, fit = fit, package = package)
@@ -532,8 +538,10 @@ calculate_params <- function(P_data,
   names(sep_params) <- param_names
   
   # Setting additional information that will be required in the daily_spi or daily_spei function
-  sep_params$distribution <- distribution
-  sep_params$package      <- package
+  sep_params$probability_zero <- pze
+  sep_params$distribution     <- distribution
+  sep_params$package          <- package
+
   
   class(sep_params) <- "params_list"
   
@@ -569,10 +577,12 @@ kalman_parameters <- function(params_list, H, ...){
   
   # Checking the position of the distribution and package in the list
   pos_attributes <- which(names(params_list) %in% c("distribution", "package"))
+  pos_pze        <- which(names(params_list) %in% "probability_zero") 
   
   # Storing the attributes in an object and excluding them from the 'params_list' object
   attributes     <- params_list[pos_attributes]
-  params_list    <- params_list[-pos_attributes]
+  pze            <- params_list[pos_pze]
+  params_list    <- params_list[-c(pos_attributes, pos_pze)]
   
   # Applying the filter for every parameter
   parameters <- names(params_list)
@@ -596,6 +606,7 @@ kalman_parameters <- function(params_list, H, ...){
   names(res) <- parameters
   
   # Passing the attributes to the final list
+  res$probability_zero <- pze
   res$distribution <- attributes$distribution
   res$package      <- attributes$package
   
@@ -605,366 +616,99 @@ kalman_parameters <- function(params_list, H, ...){
   
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #' Standardised precipitation index calculated for a specific day.
 #'
 #'@param param_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
-#' @param P_lyr 'SpatRaster' object that contains only one spatially-distributed layer of the single day for which the SPI must be calculated.
-#'   This layer must be already calculated for the specific scale and contain the date in the time slot (%Y-%m-%d). See the function 'aggregate_days4spi'
-#' spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
-#' @param distribution Character value indicating the name of the distribution function that was used for computing the param_li 
-#'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
-#' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
-#'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
-#'  @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
-#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
-#'
-#' @return This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
-#'    has to be created before, which can be achieved with the 'spi.agregate_daily' function. 
-#' @export
-#'
-#' @examples
-.spei_daily.spei <- function(x, 
-                             trgt,
-                             dates, 
-                             ref_start,
-                             ref_end,
-                             distribution,
-                             fit,
-                             params){   #### RECONVERT BETA IN GAMMA
-  
-  # Checking distribution
-  if(!distribution %in% c("Gamma", "log-Logistic", "PearsonIII"))
-    stop("The accepted distributions are 'Gamma', 'log-Logistic', and 'PearsonIII'")
-  
-  # Checking fit
-  if(!fit %in% c('ub-pwm', 'pp-pwm', 'max-lik'))
-    stop("The accepted fit  are 'ub-pwm', 'pp-pwm', and 'max-lik'")
-  
-  coef <- switch(distribution,
-                 "Gamma" = array(NA, c(2, 1, 1),
-                                 list(par=c('alpha','beta'), colnames(x), NULL)),
-                 "PearsonIII" = coef <- array(NA, c(3, 1, 1),
-                                              list(par=c('mu','sigma','gamma'), colnames(x), NULL)),
-                 "log-Logistic" = array(NA, c(3, 1, 1),
-                                        list(par=c('xi','alpha','kappa'), colnames(x), NULL)),
-                 "GEV" = array(NA, c(3, 1, 1),
-                               list(par=c('xi','alpha','kappa'), colnames(x), NULL))
-  )
-  
-  # converting into a ts
-  acu <- zoo::zoo(x, as.Date(dates))
-  
-  # converting NaNs and Inf values to NAs
-  acu[which(is.nan(acu))]      <- NA
-  acu[which(is.infinite(acu))] <- NA
-  
-  # Trim data set to reference period for fitting (acu_ref)
-  if(!is.null(ref_start) & !is.null(ref_end)){
-    
-    pos_ini <- min(which(as.Date(paste0(ref_start, "-01")) <= as.Date(dates)))
-    pos_fin <- max(which(as.Date(paste0(ref_end, "-01")) >= as.Date(dates)))
-    
-    acu_ref <- acu[pos_ini:pos_fin]
-    
-  } else {
-    
-    acu_ref <- acu
-    
-  }
-  
-  # Start a object to store the results
-  res <- c()
-  ################################
-  
-  # Analysing the NA values
-  f     <- acu_ref[!is.na(acu_ref)]
-  ff    <- acu[!is.na(acu)]
-  x_mon <- f
-  
-  # Probability of zero (pze)
-  if(distribution != 'log-Logistic' & length(na.omit(x_mon)) > 0){
-    pze   <- sum(x_mon==0) / length(x_mon)
-    x_mon <- x_mon[x_mon > 0]
-  }
-  
-  # Distribution parameters (f_params)
-  #  Fit distribution parameters
-  x_mon_sd <- sd(x_mon, na.rm=TRUE)
-  
-  #####################################################
-  # Condition to evaluate the length of values in x_mon                                               
-  if (length(x_mon) < 4) {
-    
-    val      <- NA
-    f_params <- coef[,,1]
-    
-  } else if (is.na(x_mon_sd) || (x_mon_sd == 0)){
-    
-    val      <- NA
-    f_params <- coef[,,1]
-    
-  } else if (length(na.omit(x_mon)) == 0){
-    
-    val      <- NA
-    f_params <- coef[,,1]
-    
-  } else {
-    
-    
-    # Calculate probability weighted moments based on `lmomco` or `TLMoments`
-    pwm <- switch(fit,
-                  'pp-pwm' = lmomco::pwm.pp(as.numeric(x_mon), -0.35, 0, nmom=3, sort=TRUE),
-                  'ub-pwm' = TLMoments::PWM(as.numeric(x_mon), order=0:2)
-    )
-    
-    # Check L-moments validity
-    lmom <- lmomco::pwm2lmom(pwm)
-    
-    # `lmom` fortran functions need specific inputs L1, L2, T3
-    # This is handled internally by `lmomco` with `lmorph`
-    fortran_vec <- c(lmom$lambdas[1:2], lmom$ratios[3])
-    
-    # Calculate parameters based on distribution with `lmom`, then `lmomco`
-    f_params <- switch(distribution,
-                       'log-Logistic' = tryCatch(lmom::pelglo(fortran_vec),
-                                                 error = function(e){ lmomco::parglo(lmom)$para }),
-                       'Gamma' = tryCatch(lmom::pelgam(fortran_vec),
-                                          error = function(e){ lmomco::pargam(lmom)$para }),
-                       'PearsonIII' = tryCatch(lmom::pelpe3(fortran_vec),
-                                               error = function(e){ lmomco::parpe3(lmom)$para })
-    )
-    
-    # Adjust if user chose `log-Logistic` and `max-lik`
-    if(distribution == 'log-Logistic' && fit=='max-lik'){
-      f_params <- SPEI::parglo.maxlik(x.mon, f_params)$para
-    }
-    
-    coef[,,1] <- f_params
-    
-    # Calculate CDF on `acu` using `f_params`
-    cdf_res <- switch(distribution,
-                      'log-Logistic' = lmom::cdfglo(acu, f_params),
-                      'Gamma' = lmom::cdfgam(acu, f_params),
-                      'PearsonIII' = lmom::cdfpe3(acu, f_params)
-    )
-    
-    # Store the standardized values
-    res <- qnorm(cdf_res)
-    
-    # Adjust for `pze` if distribution is Gamma or PearsonIII
-    if(distribution == 'Gamma' | distribution == 'PearsonIII'){ 
-      res <- qnorm(pze + (1-pze) * pnorm(res))
-    }
-    
-    
-    # Returning the result for the particular day
-    if(!is.null(trgt)){
-      
-      val <- res[which(trgt == dates)]
-      
-      
-    } else {
-      
-      val <- res[length(res)]
-      
-    }
-    
-    
-    # Check L-moments validity
-    if ( !lmomco::are.lmom.valid(lmom) || anyNA(lmom[[1]]) || any(is.nan(lmom[[1]])) ){ 
-      val <- NA
-    }
-    
-  }
-  
-  # Retrieving the parameters of the distribution
-  if(params){
-    
-    # Converting the parameter beta into the rate parameter (rate = 1 / Beta)
-    if(distribution == "Gamma")
-      f_params[2] <- 1 /f_params[2]
-    
-    val <- c(as.numeric(val), f_params)
-    
-  }
-  
-  return(val)
-  
-}
-
-
-
-
-
-#' Standardised precipitation index calculated for a specific day.
-#'
-#' @param Prod_data 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
+#' @param P_lyr 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
 #'   This object contains the daily accumulated values of a specific day according to the scale provided. This object can be computed with
 #'   the 'spi_agregate_daily' function.
 #'   This 'SpatRaster' must only contain the days that corresponds to the specific selection.
-#' @param trgt The day for which the function will be computed. The default is NULL, indicating that the last day of the data
-#'  will be used to return the SPI values.
-#' @param ref_start optional value that represents the starting point of the reference period used for computing the index. 
-#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-#'  The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.
-#' @param ref_end Optional value that represents the ending point of the reference period used for computing the index. 
-#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-#'  The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.
-#' @param distribution Optional value indicating the name of the distribution function to be used for computing the SPI 
-#'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
-#' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
-#'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
-#'  @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
-#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
 #'
 #' @return This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
 #'    has to be created before, which can be achieved with the 'spi.agregate_daily' function. 
 #' @export
 #'
 #' @examples
-daily_spi <- function(Prod_data,  
-                      trgt = NULL, 
-                      ref_start = NULL,
-                      ref_end = NULL, 
-                      distribution = "Gamma", 
-                      fit = "ub-pwm",
-                      params = FALSE,
-                      package = "SCI"){
+#' 
+daily_spi <- function(param_list,
+                      P_lyr){
   
-  # Check Prod_data
-  if(class(Prod_data) != "SpatRaster")
-    stop("The object 'Prod_data' must be a SpatRaster")
+  # Checking if the class of the object is 'params_list'
+  if(!class(params_list) == "params_list")
+    stop("The 'params_list' object must have a 'params_list' class. Please see the 'calculate_params' function.")
   
-  # Extract dates from Prod_data object
-  dates <- terra::time(Prod_data)
+  # Checking the resolution of P_lyr
+  if(!terra::compareGeom(P_lyr, param_list[[1]]))
+    stop("The gridded parameters in 'params_list' and the object 'P_lyr' do not have the same raster geometry.")
   
-  if(is.null(trgt))
-    trgt <- dates[length(dates)]
+  # Checking the position of the distribution and package in the list
+  pos_attributes <- which(names(params_list) %in% c("distribution", "package"))
+  pos_pze        <- which(names(params_list) %in% c("probability_zero"))
   
-  # Evaluate the 'trgt' element
-  if(!is.null(trgt) & !as.Date(trgt) %in% dates)
-    stop("The 'trgt' date should be included in 'Prod_data'.")
+  # Storing the attributes in an object and excluding them from the 'params_list' object
+  pze            <- params_list[pos_pze]
+  attributes     <- params_list[pos_attributes]
+  params_list    <- params_list[-c(pos_attributes, pos_pze)]
   
-  # Check ref_start object
-  if(class(ref_start) != "character" & !is.null(ref_start))
-    stop("If object 'ref_start' is not set to NULL, it must be a character object that indicates the starting point of the reference period used for computing the SPEI. The format should be '%Y-%m'")
+  # Converting the 'SpatRaster' object in matrices
+  params_matrix <- list()
+  for(i in 1:length(params_list))
+    params_matrix[[i]] <- as.matrix(params_list[[i]])
   
-  # Check ref_end object
-  if(class(ref_end) != "character" & !is.null(ref_end))
-    stop("If object 'ref_end' is not set to NULL, it must be a character object that indicates the ending point of the reference period used for computing the SPEI. The format should be '%Y-%m'")
+  names(params_matrix) <- names(params_list)
   
-  # Check ref_start and ref_end
-  if(is.null(ref_start) & !is.null(ref_end))
-    stop("The objects 'ref_start' and 'ref_end' should be either both NULL or both character!")
+  # Converting the P_lyr and pze to matrix
+  P_matrix   <- as.matrix(P_lyr)
+  pze_matrix <- as.matrix(pze)
   
-  if(!is.null(ref_start) & is.null(ref_end))
-    stop("The objects 'ref_start' and 'ref_end' should be either both NULL or both character!")
+  # Setting target day, dates, and used reference period
+  trgt       <- terra::time(P_lyr)
   
-  # Checking the 'package' object
-  if(!package %in% c("SPEI", "SCI"))
-    stop("The 'package' object must be either 'SPEI' or 'SCI'")
-  
-  # Apply daily SPI
-  if(package == "SPEI"){
+  # Implementation of the SPEI package ('sbegueria' https://github.com/sbegueria/SPEI/blob/master/R/spei.R)
+  if(attributes$package == "SPEI"){
     
-    idx <- terra::app(Prod_data, .spei_daily.spei, trgt = trgt, dates = dates, 
-                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, 
-                      fit = fit, params = params)
+    result <- .spei_daily.spei(params_matrix, P_matrix, pze_matrix,
+                                           trgt = trgt, distribution = attributes$distribution)
     
-  } else {
-    
-    idx <- terra::app(Prod_data, .spei_daily.sci, trgt = trgt, dates = dates, 
-                      ref_start = ref_start, ref_end =ref_end, distribution = distribution, 
-                      fit = fit, params = params)
-    
-  }
-  
-  ## set dates and return
-  terra::time(idx)  <- rep(as.Date(trgt), terra::nlyr(idx))
-  
-  # Avoid NaNs and infinite values
-  idx[is.nan(idx)]      <- NA
-  idx[is.infinite(idx)] <- NA
-  
-  # Adding information in case that 'params' is set to true
-  if(params){
-    
-    names <- switch(distribution,
-                    "Gamma" = c('shape','rate'),
-                    "PearsonIII" = c('mu','sigma','gamma'),
-                    "log-Logistic" = c('xi','alpha','kappa')
-    )
-    
-    
-    names(idx) <- c("Values", names)
-    
-  } else {
-    names(idx)  <- paste0(substr(trgt, 1, 7)) 
-  }
-  
-  return(idx)
-  
-}
 
+  # Implementation of the SCI package ( https://github.com/cran/SCI/blob/master/R/sci.r)
+  } else {
+    
+    result <- .spei_daily.sci(params_matrix, P_matrix, pze_matrix,
+                              trgt = trgt, distribution = attributes$distribution)
+    
+  }
+  
+  # converting it into a 'SpatRaster'
+  final_layer <- param_list[[1]][[1]]
+  terra::values(final_layer) <- result
+  terra::time(final_layer)   <- trgt
+  names(final_layer)         <- trgt
+   
+  return(final_layer)
+}
 
 #' Standardised precipitation evapotranspiration index calculated for a specific day. 
 #'  This function is a wrapper function of daily.spi
 #'
-#' @param Prod_data 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
+#'@param param_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
+#' @param P_lyr 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
 #'   This object contains the daily accumulated values of a specific day according to the scale provided. This object can be computed with
 #'   the 'spi_agregate_daily' function.
 #'   This 'SpatRaster' must only contain the days that corresponds to the specific selection.
-#' @param trgt The day for which the function will be computed. The default is NULL, indicating that the last day of the data
-#'  will be used to return the SPI values.
-#' @param ref_start optional value that represents the starting point of the reference period used for computing the index. 
-#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-#'  The default is NULL, which indicates that the first layer in the 'SpatRaster' will be used as starting point.
-#' @param ref_end Optional value that represents the ending point of the reference period used for computing the index. 
-#'  The date should be introduced as '\%Y-\%m'. For example: "1989-02".
-#'  The default is NULL, which indicates that the last layer in the 'SpatRaster' will be used as ending point.
-#' @param distribution Optional value indicating the name of the distribution function to be used for computing the SPI 
-#'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
-#' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
-#'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
-#'  @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
-#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
 #'
-#' @return
+#' @return This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
+#'    has to be created before, which can be achieved with the 'spi.agregate_daily' function. 
 #' @export
 #'
 #' @examples
-daily_spei <- function(Prod_data,  
-                      trgt = NULL, 
-                      ref_start = NULL,
-                      ref_end = NULL, 
-                      distribution = "log-Logistic", 
-                      fit = "ub-pwm",
-                      params = FALSE,
-                      package = "SCI"){
+#' 
+daily_spi <- function(param_list,
+                      P_lyr){
   
- idx <- daily.spi(Prod_data, trgt = trgt, ref_start = ref_start, 
-                  ref_end = ref_end, distribution = distribution, fit = fit, params = params)
+ idx <- daily_spi(param_list, P_lyr)
   
 
   return(idx)
   
 }
-
-
-
-

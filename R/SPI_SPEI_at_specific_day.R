@@ -299,7 +299,7 @@ kalman_parameters <- function(params_list, H, ...){
   
   # Storing the attributes in an object and excluding them from the 'params_list' object
   attributes     <- params_list[pos_attributes]
-  pze            <- params_list[pos_pze]
+  pze            <- params_list[[pos_pze]]
   params_list    <- params_list[-c(pos_attributes, pos_pze)]
   
   # Applying the filter for every parameter
@@ -364,7 +364,7 @@ daily_spi <- function(param_list,
   pos_pze        <- which(names(params_list) %in% c("probability_zero"))
   
   # Storing the attributes in an object and excluding them from the 'params_list' object
-  pze            <- params_list[pos_pze]
+  pze            <- params_list[[pos_pze]]
   attributes     <- params_list[pos_attributes]
   params_list    <- params_list[-c(pos_attributes, pos_pze)]
   
@@ -381,6 +381,10 @@ daily_spi <- function(param_list,
   
   # Setting target day, dates, and used reference period
   trgt       <- terra::time(P_lyr)
+  
+  # If trgt is 29th of February, take the parameters of the 28th of February (My birthday by the way...)
+  if(substr(trgt, 6, 10) == "02-29")
+    trgt <- paste0(substr(trgt, 1, 4), "-02-28")
   
   # Implementation of the SPEI package ('sbegueria' https://github.com/sbegueria/SPEI/blob/master/R/spei.R)
   if(attributes$package == "SPEI"){
@@ -430,3 +434,130 @@ daily_spi <- function(param_list,
   return(idx)
   
 }
+
+#' Export the param_list object to a specific directory
+#'
+#'@param param_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
+#' @param dir Path to the directory to save the data
+#' @param folder_name Which is the name of the parent folder that will be created to store the results? Defaults to NULL (name of folder = Results)
+#' @param export Logical. Should the object be exported. Defaults to FALSE, and therefore, if it is not actively changed by the user,
+#'   it will not write anything to the directory
+#'
+#' @return Writes the param_list object to a specific directory
+#' @export
+#'
+#' @examples
+write_parameters <- function(params_list, dir, folder_name = NULL, export = FALSE){
+  
+  # Checking if the class of the object is 'params_list'
+  if(!class(params_list) == "params_list")
+    stop("The 'params_list' object must have a 'params_list' class. Please see the 'calculate_params' function.")
+  
+  if(!file.exists(dir))
+    stop("The path of the object 'dir' does not exist.")
+  
+  if(is.null(folder_name))
+    folder_name <- "Results"
+  
+  if(export){
+    
+    # Generating paths
+    parameters_path <- file.path(dir, folder_name, "Parameters")
+    pze_path        <- file.path(dir, folder_name, "Prob_zeroes")
+    attributes_path <- file.path(dir, folder_name, "Attributes")
+    
+    # Creating folders
+    if(!file.exists(parameters_path))
+      dir.create(pze_path, recursive = TRUE)
+    if(!file.exists(parameters_path))
+      dir.create(parameters_path, recursive = TRUE)
+    if(!file.exists(attributes_path))
+      dir.create(attributes_path, recursive = TRUE)
+    
+    # Checking the position of the distribution and package in the list
+    pos_attributes <- which(names(params_list) %in% c("distribution", "package"))
+    pos_pze        <- which(names(params_list) %in% c("probability_zero"))
+    
+    # Storing the attributes in an object and excluding them from the 'params_list' object
+    pze            <- params_list[[pos_pze]]
+    attributes     <- params_list[pos_attributes]
+    params_list    <- params_list[-c(pos_attributes, pos_pze)]
+    param_names    <- names(params_list)
+    
+    # Storing parameters NC files
+    for(i in 1:length(params_list)){
+      param_names <- names(params_list)
+      r           <- params_list[[i]]
+      n           <- paste0(param_names[i], ".nc")
+      n           <- file.path(parameters_path, n)
+      writeCDF(r, n, overwrite = TRUE)
+    }
+    
+    # Storing PZE
+    pze_name <- file.path(pze_path, "Prob_zeroes.nc")
+    writeCDF(pze$probability_zero, pze_name, overwrite = TRUE)
+    
+    # Storing attributes
+    saveRDS(attributes, file.path(attributes_path, "Attributes.RDS"))
+    
+  } # end if
+  
+}
+
+#' Import the param_list object to a specific directory
+#'
+#' @param dir Path to the directory where the data is stored
+#' @param folder_name Which is the name of the parent folder that will be created to store the results? Defaults to NULL (name of folder = Results)
+#'
+#' @return imports the param_list object that is saved to a specific location
+#'
+#' @examples
+read_parameters <- function(dir, folder_name = NULL){
+  
+  if(is.null(folder_name))
+    folder_name <- "Results"
+  
+  # generating the full path
+  dir <- file.path(dir, folder_name)
+  
+  if(!file.exists(dir))
+    stop("The path 'dir'/'foldername' does not exist.")
+  
+  parameters_path <- file.path(dir, folder_name, "Parameters")
+  pze_path        <- file.path(dir, folder_name, "Prob_zeroes")
+  attributes_path <- file.path(dir, folder_name, "Attributes")
+   
+  # Generating the parameter layers
+  params_list_files <- list.files(parameters_path, full.names = TRUE, pattern = ".nc$")
+  params_list       <- list()
+  
+  for(i in 1:length(params_list_files)){
+    
+    params_list[[i]] <- terra::rast(params_list_files[i])
+    
+  }
+
+  names(params_list) <- tools::file_path_sans_ext(params_list_files)
+  
+  # Reading the PZE
+  pze <- file.path(pze_path, "Prob_zeroes.nc")
+  pze <- terra::rast(pze)
+  
+  # Reading attributes
+  attributes <- file.path(attributes_path, "Attributes.RDS")
+  attributes <- readRDS(attributes)
+  
+  # Constructing the object
+  params_list$distribution     <- attributes$distribution
+  params_list$package          <- attributes$package
+  params_list$probability_zero <- attributes$probability_zero
+  
+  class(params_list) <- "params_list"
+  
+  return(params_list)
+}
+
+
+
+
+

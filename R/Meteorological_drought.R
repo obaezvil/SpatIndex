@@ -531,6 +531,12 @@ calculate_params <- function(P_data,
   # Setting the manes of the list
   names(sep_params) <- param_names
   
+  # Setting additional information that will be required in the daily_spi or daily_spei function
+  sep_params$distribution <- distribution
+  sep_params$package      <- package
+  
+  class(sep_params) <- "params_list"
+  
   return(sep_params)
   
 }
@@ -549,16 +555,10 @@ calculate_params <- function(P_data,
 #' @examples
 kalman_parameters <- function(params_list, H, ...){
   
-  # Checking that param_list is a list
-  if(!is.list(params_list))
-    stop("The object 'params_list' must be a list")
-  
-  # Checking that contains 'SpatRaster' objects
-  class <- summary(params_list)
-  class <- unique(class[,2])
-  if(!length(class) == 1 | !class == "SpatRaster")
-    stop("The object 'params_list' must only contain SpatRaster objects!")
-  
+  # Checking if the class of the object is 'params_list'
+  if(!class(params_list) == "params_list")
+    stop("The 'params_list' object must have a 'params_list' class. Please see the 'calculate_params' function.")
+
   # Checking the object H
   if(!is.numeric(H))
     stop("The parameter 'H' must be numeric")
@@ -566,6 +566,13 @@ kalman_parameters <- function(params_list, H, ...){
   # Checking length of H
   if(!(length(H) == 1 | length(H) == length(params_list)))
     stop("The length of the parameter 'H' must be either 1 or equal to the number of parameters")
+  
+  # Checking the position of the distribution and package in the list
+  pos_attributes <- which(names(params_list) %in% c("distribution", "package"))
+  
+  # Storing the attributes in an object and excluding them from the 'params_list' object
+  attributes     <- params_list[pos_attributes]
+  params_list    <- params_list[-pos_attributes]
   
   # Applying the filter for every parameter
   parameters <- names(params_list)
@@ -588,12 +595,217 @@ kalman_parameters <- function(params_list, H, ...){
   # Setting the names to the smoothed parameters
   names(res) <- parameters
   
-  return(res)
+  # Passing the attributes to the final list
+  res$distribution <- attributes$distribution
+  res$package      <- attributes$package
   
+  class(res) <- "params_list"
+  
+  return(res)
   
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#' Standardised precipitation index calculated for a specific day.
+#'
+#'@param param_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
+#' @param P_lyr 'SpatRaster' object that contains only one spatially-distributed layer of the single day for which the SPI must be calculated.
+#'   This layer must be already calculated for the specific scale and contain the date in the time slot (%Y-%m-%d). See the function 'aggregate_days4spi'
+#' spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
+#' @param distribution Character value indicating the name of the distribution function that was used for computing the param_li 
+#'  (one of 'log-Logistic', 'Gamma' and 'PearsonIII'). Defaults to 'log-Logistic' for SPEI.
+#' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
+#'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
+#'  @param params Should the parameters of the selected distributions be returned? Set to FALSE as the default.
+#' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
+#'
+#' @return This function returns one layer of SPI-n according to a selected day. The input object 'Prod_data'
+#'    has to be created before, which can be achieved with the 'spi.agregate_daily' function. 
+#' @export
+#'
+#' @examples
+.spei_daily.spei <- function(x, 
+                             trgt,
+                             dates, 
+                             ref_start,
+                             ref_end,
+                             distribution,
+                             fit,
+                             params){   #### RECONVERT BETA IN GAMMA
+  
+  # Checking distribution
+  if(!distribution %in% c("Gamma", "log-Logistic", "PearsonIII"))
+    stop("The accepted distributions are 'Gamma', 'log-Logistic', and 'PearsonIII'")
+  
+  # Checking fit
+  if(!fit %in% c('ub-pwm', 'pp-pwm', 'max-lik'))
+    stop("The accepted fit  are 'ub-pwm', 'pp-pwm', and 'max-lik'")
+  
+  coef <- switch(distribution,
+                 "Gamma" = array(NA, c(2, 1, 1),
+                                 list(par=c('alpha','beta'), colnames(x), NULL)),
+                 "PearsonIII" = coef <- array(NA, c(3, 1, 1),
+                                              list(par=c('mu','sigma','gamma'), colnames(x), NULL)),
+                 "log-Logistic" = array(NA, c(3, 1, 1),
+                                        list(par=c('xi','alpha','kappa'), colnames(x), NULL)),
+                 "GEV" = array(NA, c(3, 1, 1),
+                               list(par=c('xi','alpha','kappa'), colnames(x), NULL))
+  )
+  
+  # converting into a ts
+  acu <- zoo::zoo(x, as.Date(dates))
+  
+  # converting NaNs and Inf values to NAs
+  acu[which(is.nan(acu))]      <- NA
+  acu[which(is.infinite(acu))] <- NA
+  
+  # Trim data set to reference period for fitting (acu_ref)
+  if(!is.null(ref_start) & !is.null(ref_end)){
+    
+    pos_ini <- min(which(as.Date(paste0(ref_start, "-01")) <= as.Date(dates)))
+    pos_fin <- max(which(as.Date(paste0(ref_end, "-01")) >= as.Date(dates)))
+    
+    acu_ref <- acu[pos_ini:pos_fin]
+    
+  } else {
+    
+    acu_ref <- acu
+    
+  }
+  
+  # Start a object to store the results
+  res <- c()
+  ################################
+  
+  # Analysing the NA values
+  f     <- acu_ref[!is.na(acu_ref)]
+  ff    <- acu[!is.na(acu)]
+  x_mon <- f
+  
+  # Probability of zero (pze)
+  if(distribution != 'log-Logistic' & length(na.omit(x_mon)) > 0){
+    pze   <- sum(x_mon==0) / length(x_mon)
+    x_mon <- x_mon[x_mon > 0]
+  }
+  
+  # Distribution parameters (f_params)
+  #  Fit distribution parameters
+  x_mon_sd <- sd(x_mon, na.rm=TRUE)
+  
+  #####################################################
+  # Condition to evaluate the length of values in x_mon                                               
+  if (length(x_mon) < 4) {
+    
+    val      <- NA
+    f_params <- coef[,,1]
+    
+  } else if (is.na(x_mon_sd) || (x_mon_sd == 0)){
+    
+    val      <- NA
+    f_params <- coef[,,1]
+    
+  } else if (length(na.omit(x_mon)) == 0){
+    
+    val      <- NA
+    f_params <- coef[,,1]
+    
+  } else {
+    
+    
+    # Calculate probability weighted moments based on `lmomco` or `TLMoments`
+    pwm <- switch(fit,
+                  'pp-pwm' = lmomco::pwm.pp(as.numeric(x_mon), -0.35, 0, nmom=3, sort=TRUE),
+                  'ub-pwm' = TLMoments::PWM(as.numeric(x_mon), order=0:2)
+    )
+    
+    # Check L-moments validity
+    lmom <- lmomco::pwm2lmom(pwm)
+    
+    # `lmom` fortran functions need specific inputs L1, L2, T3
+    # This is handled internally by `lmomco` with `lmorph`
+    fortran_vec <- c(lmom$lambdas[1:2], lmom$ratios[3])
+    
+    # Calculate parameters based on distribution with `lmom`, then `lmomco`
+    f_params <- switch(distribution,
+                       'log-Logistic' = tryCatch(lmom::pelglo(fortran_vec),
+                                                 error = function(e){ lmomco::parglo(lmom)$para }),
+                       'Gamma' = tryCatch(lmom::pelgam(fortran_vec),
+                                          error = function(e){ lmomco::pargam(lmom)$para }),
+                       'PearsonIII' = tryCatch(lmom::pelpe3(fortran_vec),
+                                               error = function(e){ lmomco::parpe3(lmom)$para })
+    )
+    
+    # Adjust if user chose `log-Logistic` and `max-lik`
+    if(distribution == 'log-Logistic' && fit=='max-lik'){
+      f_params <- SPEI::parglo.maxlik(x.mon, f_params)$para
+    }
+    
+    coef[,,1] <- f_params
+    
+    # Calculate CDF on `acu` using `f_params`
+    cdf_res <- switch(distribution,
+                      'log-Logistic' = lmom::cdfglo(acu, f_params),
+                      'Gamma' = lmom::cdfgam(acu, f_params),
+                      'PearsonIII' = lmom::cdfpe3(acu, f_params)
+    )
+    
+    # Store the standardized values
+    res <- qnorm(cdf_res)
+    
+    # Adjust for `pze` if distribution is Gamma or PearsonIII
+    if(distribution == 'Gamma' | distribution == 'PearsonIII'){ 
+      res <- qnorm(pze + (1-pze) * pnorm(res))
+    }
+    
+    
+    # Returning the result for the particular day
+    if(!is.null(trgt)){
+      
+      val <- res[which(trgt == dates)]
+      
+      
+    } else {
+      
+      val <- res[length(res)]
+      
+    }
+    
+    
+    # Check L-moments validity
+    if ( !lmomco::are.lmom.valid(lmom) || anyNA(lmom[[1]]) || any(is.nan(lmom[[1]])) ){ 
+      val <- NA
+    }
+    
+  }
+  
+  # Retrieving the parameters of the distribution
+  if(params){
+    
+    # Converting the parameter beta into the rate parameter (rate = 1 / Beta)
+    if(distribution == "Gamma")
+      f_params[2] <- 1 /f_params[2]
+    
+    val <- c(as.numeric(val), f_params)
+    
+  }
+  
+  return(val)
+  
+}
 
 
 

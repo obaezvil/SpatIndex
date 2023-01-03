@@ -336,7 +336,7 @@ kalman_parameters <- function(params_list, H, ...){
 
 #' Standardised precipitation index calculated for a specific day.
 #'
-#'@param param_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
+#'@param params_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
 #' @param P_lyr 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
 #'   This object contains the daily accumulated values of a specific day according to the scale provided. This object can be computed with
 #'   the 'spi_agregate_daily' function.
@@ -348,7 +348,7 @@ kalman_parameters <- function(params_list, H, ...){
 #'
 #' @examples
 #' 
-daily_spi <- function(param_list,
+daily_spi <- function(params_list,
                       P_lyr){
   
   # Checking if the class of the object is 'params_list'
@@ -356,7 +356,7 @@ daily_spi <- function(param_list,
     stop("The 'params_list' object must have a 'params_list' class. Please see the 'calculate_params' function.")
   
   # Checking the resolution of P_lyr
-  if(!terra::compareGeom(P_lyr, param_list[[1]]))
+  if(!terra::compareGeom(P_lyr, params_list[[1]]))
     stop("The gridded parameters in 'params_list' and the object 'P_lyr' do not have the same raster geometry.")
   
   # Checking the position of the distribution and package in the list
@@ -384,25 +384,33 @@ daily_spi <- function(param_list,
   
   # If trgt is 29th of February, take the parameters of the 28th of February (My birthday by the way...)
   if(substr(trgt, 6, 10) == "02-29")
-    trgt <- paste0(substr(trgt, 1, 4), "-02-28")
+    trgt <- as.Date(paste0(substr(trgt, 1, 4), "-02-28"))
+  
+  # Getting dates from params
+  dates <- terra::time(params_list[[1]])
   
   # Implementation of the SPEI package ('sbegueria' https://github.com/sbegueria/SPEI/blob/master/R/spei.R)
   if(attributes$package == "SPEI"){
     
-    result <- .spei_daily.spei(params_matrix, P_matrix, pze_matrix,
-                               trgt = trgt, distribution = attributes$distribution)
+    suppressWarnings({
+      result <- .spei_daily.spei(params_matrix, P_matrix, pze_matrix,
+                                 trgt = trgt, distribution = attributes$distribution, dates = dates)
+    })
+    
     
     
     # Implementation of the SCI package ( https://github.com/cran/SCI/blob/master/R/sci.r)
   } else {
     
-    result <- .spei_daily.sci(params_matrix, P_matrix, pze_matrix,
-                              trgt = trgt, distribution = attributes$distribution)
+    suppressWarnings({
+      result <- .spei_daily.sci(params_matrix, P_matrix, pze_matrix,
+                                trgt = trgt, distribution = attributes$distribution, dates = dates)
+    })
     
   }
   
   # converting it into a 'SpatRaster'
-  final_layer <- param_list[[1]][[1]]
+  final_layer <- params_list[[1]][[1]]
   terra::values(final_layer) <- result
   terra::time(final_layer)   <- trgt
   names(final_layer)         <- trgt
@@ -413,7 +421,7 @@ daily_spi <- function(param_list,
 #' Standardised precipitation evapotranspiration index calculated for a specific day. 
 #'  This function is a wrapper function of daily.spi
 #'
-#'@param param_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
+#'@param params_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
 #' @param P_lyr 'SpatRaster' object that contains spatially-distributed monthly data for a specific date (e.g., "%Y-02-28).
 #'   This object contains the daily accumulated values of a specific day according to the scale provided. This object can be computed with
 #'   the 'spi_agregate_daily' function.
@@ -425,25 +433,25 @@ daily_spi <- function(param_list,
 #'
 #' @examples
 #' 
-daily_spi <- function(param_list,
+daily_spei <- function(params_list,
                       P_lyr){
   
-  idx <- daily_spi(param_list, P_lyr)
+  idx <- daily_spi(params_list, P_lyr)
   
   
   return(idx)
   
 }
 
-#' Export the param_list object to a specific directory
+#' Export the params_list object to a specific directory
 #'
-#'@param param_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
+#'@param params_list A list object that contains a 'SpatRaster' of 365 layers for each parameter of the selected distribution.
 #' @param dir Path to the directory to save the data
 #' @param folder_name Which is the name of the parent folder that will be created to store the results? Defaults to NULL (name of folder = Results)
 #' @param export Logical. Should the object be exported. Defaults to FALSE, and therefore, if it is not actively changed by the user,
 #'   it will not write anything to the directory
 #'
-#' @return Writes the param_list object to a specific directory
+#' @return Writes the params_list object to a specific directory
 #' @export
 #'
 #' @examples
@@ -467,7 +475,7 @@ write_parameters <- function(params_list, dir, folder_name = NULL, export = FALS
     attributes_path <- file.path(dir, folder_name, "Attributes")
     
     # Creating folders
-    if(!file.exists(parameters_path))
+    if(!file.exists(pze_path))
       dir.create(pze_path, recursive = TRUE)
     if(!file.exists(parameters_path))
       dir.create(parameters_path, recursive = TRUE)
@@ -495,7 +503,7 @@ write_parameters <- function(params_list, dir, folder_name = NULL, export = FALS
     
     # Storing PZE
     pze_name <- file.path(pze_path, "Prob_zeroes.nc")
-    writeCDF(pze$probability_zero, pze_name, overwrite = TRUE)
+    writeCDF(pze, pze_name, overwrite = TRUE)
     
     # Storing attributes
     saveRDS(attributes, file.path(attributes_path, "Attributes.RDS"))
@@ -504,12 +512,12 @@ write_parameters <- function(params_list, dir, folder_name = NULL, export = FALS
   
 }
 
-#' Import the param_list object to a specific directory
+#' Import the params_list object to a specific directory
 #'
 #' @param dir Path to the directory where the data is stored
 #' @param folder_name Which is the name of the parent folder that will be created to store the results? Defaults to NULL (name of folder = Results)
 #'
-#' @return imports the param_list object that is saved to a specific location
+#' @return imports the params_list object that is saved to a specific location
 #'
 #' @examples
 read_parameters <- function(dir, folder_name = NULL){
@@ -523,9 +531,9 @@ read_parameters <- function(dir, folder_name = NULL){
   if(!file.exists(dir))
     stop("The path 'dir'/'foldername' does not exist.")
   
-  parameters_path <- file.path(dir, folder_name, "Parameters")
-  pze_path        <- file.path(dir, folder_name, "Prob_zeroes")
-  attributes_path <- file.path(dir, folder_name, "Attributes")
+  parameters_path <- file.path(dir, "Parameters")
+  pze_path        <- file.path(dir, "Prob_zeroes")
+  attributes_path <- file.path(dir, "Attributes")
    
   # Generating the parameter layers
   params_list_files <- list.files(parameters_path, full.names = TRUE, pattern = ".nc$")
@@ -537,7 +545,7 @@ read_parameters <- function(dir, folder_name = NULL){
     
   }
 
-  names(params_list) <- tools::file_path_sans_ext(params_list_files)
+  names(params_list) <- tools::file_path_sans_ext(basename(params_list_files))
   
   # Reading the PZE
   pze <- file.path(pze_path, "Prob_zeroes.nc")
@@ -550,7 +558,7 @@ read_parameters <- function(dir, folder_name = NULL){
   # Constructing the object
   params_list$distribution     <- attributes$distribution
   params_list$package          <- attributes$package
-  params_list$probability_zero <- attributes$probability_zero
+  params_list$probability_zero <- pze
   
   class(params_list) <- "params_list"
   

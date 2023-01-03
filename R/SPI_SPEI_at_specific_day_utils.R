@@ -494,10 +494,11 @@ aggregate_days4spi <- function(Prod_data,
 #' @examples
 .spei_daily.spei <- function(params_matrix, P_matrix, pze_matrix,
                              trgt,
-                             distribution){
+                             distribution, dates){
   
   # Getting the position of the day
-  pos_day <- which(colnames(params_matrix[[1]]) == trgt)
+  dts     <- substr(dates, 6, 10)
+  pos_day <- which(dts == substr(trgt, 6, 10))
   
   # Extracting the parameters of the specific day
   params <- list()
@@ -575,7 +576,8 @@ aggregate_days4spi <- function(Prod_data,
 #' @examples
 .spei_daily.sci <- function(params_matrix, P_matrix, pze_matrix,
                             trgt,
-                            distribution){
+                            distribution,
+                            dates){
   
   # Adjusting distributions for SCI package
   if(distribution == "Gamma")
@@ -588,7 +590,8 @@ aggregate_days4spi <- function(Prod_data,
     distribution <- 'pe3'
   
   # Getting the position of the day
-  pos_day <- which(colnames(params_matrix[[1]]) == trgt)
+  dts     <- substr(dates, 6, 10)
+  pos_day <- which(dts == substr(trgt, 6, 10))
   
   # Extracting the parameters of the specific day
   params <- list()
@@ -607,12 +610,6 @@ aggregate_days4spi <- function(Prod_data,
   # Setting the required values
   pdistr <- distribution
   pdistr <- match.fun(paste("p", pdistr, sep = ""))
-  
-  if(distribution == "gamma")
-    colnames(params) <- c("shape", "rate")
-  
-  
-  
   
   ##### Iterative process to retrieve all values
   res <- c()

@@ -4,7 +4,7 @@
 \alias{.spei_daily.sci}
 \title{Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SCI package}
 \usage{
-.spei_daily.sci(params_matrix, P_matrix, pze_matrix, trgt, distribution)
+.spei_daily.sci(params_matrix, P_matrix, pze_matrix, trgt, distribution, dates)
 }
 \arguments{
 \item{params_matrix}{matrix obtained from the parameters list}

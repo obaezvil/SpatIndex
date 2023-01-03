@@ -2,7 +2,7 @@
 % Please edit documentation in R/SPI_SPEI_at_specific_day.R
 \name{read_parameters}
 \alias{read_parameters}
-\title{Import the param_list object to a specific directory}
+\title{Import the params_list object to a specific directory}
 \usage{
 read_parameters(dir, folder_name = NULL)
 }
@@ -12,8 +12,8 @@ read_parameters(dir, folder_name = NULL)
 \item{folder_name}{Which is the name of the parent folder that will be created to store the results? Defaults to NULL (name of folder = Results)}
 }
 \value{
-imports the param_list object that is saved to a specific location
+imports the params_list object that is saved to a specific location
 }
 \description{
-Import the param_list object to a specific directory
+Import the params_list object to a specific directory
 }

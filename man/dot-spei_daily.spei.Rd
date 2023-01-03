@@ -5,7 +5,14 @@
 \title{Utils function to compute the SPI or SPEI using a vector. This function is based on the code presented in the SPEI package
  from 'sbegueria' https://github.com/sbegueria/SPEI/blob/master/R/spei.R}
 \usage{
-.spei_daily.spei(params_matrix, P_matrix, pze_matrix, trgt, distribution)
+.spei_daily.spei(
+  params_matrix,
+  P_matrix,
+  pze_matrix,
+  trgt,
+  distribution,
+  dates
+)
 }
 \arguments{
 \item{params_matrix}{matrix obtained from the parameters list}

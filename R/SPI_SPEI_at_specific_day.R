@@ -217,7 +217,7 @@ calculate_params <- function(P_data,
     # Setting the 'trgt' day
     year <- max(as.numeric(substr(dates, 1, 4)))
     if(!is.null(ref_start))
-      year <- as.numeric(substr(ref_start), 1, 4)
+      year <- as.numeric(substr(ref_start, 1, 4))
     
     target <- paste0(year, "-", periods[i])
     

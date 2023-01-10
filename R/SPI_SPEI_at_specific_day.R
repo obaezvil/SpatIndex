@@ -378,6 +378,8 @@ daily_spi <- function(params_list,
   # Converting the P_lyr and pze to matrix
   P_matrix   <- as.matrix(P_lyr)
   pze_matrix <- as.matrix(pze)
+  # If there is a NaN means that the calculation of pze was indefinite and should be zero
+  pze_matrix[which(is.nan(pze_matrix))] <- 0
   
   # Setting target day, dates, and used reference period
   trgt       <- terra::time(P_lyr)

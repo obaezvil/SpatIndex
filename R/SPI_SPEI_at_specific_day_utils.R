@@ -521,6 +521,10 @@ aggregate_days4spi <- function(Prod_data,
   # Transforming params to a data frame
   params <- do.call(cbind,params)
   
+  # Ordering if the distribution is log-Logistic
+  if(distribution == "log-Logistic")
+    params <- params[,c("xi", "alpha", "kappa")]
+  
   ##### Iterative process to retrieve all values
   res <- c()
   for(i in 1:nrow(params)){

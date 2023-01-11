@@ -43,6 +43,7 @@ aggregate_days4spi <- function(Prod_data,
   
   # extracting the desired period to compute the accumulations
   period <- substr(trgt, 6, 10)
+  period <- paste0("-", period)
   
   # Matching the dates of multiple years that are equal to 'period' and calculating the
   #   initial positions where the accumulation of days should begin (to calculate the monthly 

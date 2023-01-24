@@ -166,7 +166,15 @@ aggregate_days4spi <- function(Prod_data,
   # Probability of zero (pze)
   if(distribution != 'log-Logistic' & length(na.omit(x_mon)) > 0){
     pze   <- sum(x_mon==0) / length(x_mon)
+    
+    # Catch that adds a single value close to zero if there are zeros in the
+    # fitting period.  This forces the distribution to tend towards zero,
+    # preventing a "gap" between 0 and data.
+    if(pze > 0)
+      x_mon <- c(x_mon, 0.01 * min(x_mon, na.rm=TRUE))
+    
     x_mon <- x_mon[x_mon > 0]
+      
   }
   
   # Distribution parameters (f_params)
@@ -191,7 +199,6 @@ aggregate_days4spi <- function(Prod_data,
     f_params <- coef[,,1]
     
   } else {
-    
     
     # Calculate probability weighted moments based on `lmomco` or `TLMoments`
     pwm <- switch(fit,
@@ -230,8 +237,11 @@ aggregate_days4spi <- function(Prod_data,
   }
   
   # Converting the parameter beta into the rate parameter (rate = 1 / Beta)
-  if(distribution == "Gamma")
-    f_params[2] <- 1 /f_params[2]
+  if(distribution == "Gamma"){
+    f_params[2]        <- 1 /f_params[2]
+    names(f_params)[2] <- "rate"
+  }
+    
   
   return(f_params)
   
@@ -344,7 +354,7 @@ aggregate_days4spi <- function(Prod_data,
     x.fit[[1]]       <- empty.fit
     x.fit.monitor[1] <- 4
     
-  } else if(all(mledist.par$data==mledist.par$data[1])){ ## if all values in calibration period are eaqual...
+  } else if(all(mledist.par$data==mledist.par$data[1])){ ## if all values in calibration period are equal...
     
     x.fit[[1]]       <- empty.fit
     x.fit.monitor[1] <- 5
@@ -361,7 +371,7 @@ aggregate_days4spi <- function(Prod_data,
       mledist.par$data <- mledist.par$data[mledist.par$data > 0]
       ## Catch that adds a single value close to zero if there are zeros in the
       ## fitting period.  This forces the distribution to tend towards zero,
-      ## preventing a "gap" betwen 0 and data.
+      ## preventing a "gap" between 0 and data.
       mledist.par$data <- c(mledist.par$data, 0.01 * min(mledist.par$data, na.rm=TRUE))
       
     }

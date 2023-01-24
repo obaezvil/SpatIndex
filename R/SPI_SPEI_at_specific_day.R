@@ -103,7 +103,7 @@ params_spi <- function(Prod_data,
   
   # Adding names to the parameters
   names <- switch(distribution,
-                  "Gamma" = c('shape','rate'),
+                  "Gamma" = c('alpha','beta'),
                   "PearsonIII" = c('mu','sigma','gamma'),
                   "log-Logistic" = c('xi','alpha','kappa')
   )

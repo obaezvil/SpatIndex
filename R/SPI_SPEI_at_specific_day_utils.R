@@ -166,14 +166,15 @@ aggregate_days4spi <- function(Prod_data,
   # Probability of zero (pze)
   if(distribution != 'log-Logistic' & length(na.omit(x_mon)) > 0){
     pze   <- sum(x_mon==0) / length(x_mon)
-    
+    x_mon <- x_mon[x_mon > 0]
     # Catch that adds a single value close to zero if there are zeros in the
     # fitting period.  This forces the distribution to tend towards zero,
     # preventing a "gap" between 0 and data.
-    if(pze > 0)
-      x_mon <- c(x_mon, 0.01 * min(x_mon, na.rm=TRUE))
+    if(pze > 0){
+      x_mon <- c(as.numeric(x_mon), 0.01 * min(x_mon, na.rm=TRUE))
+    }
     
-    x_mon <- x_mon[x_mon > 0]
+    
       
   }
   
@@ -235,14 +236,7 @@ aggregate_days4spi <- function(Prod_data,
     }
     
   }
-  
-  # Converting the parameter beta into the rate parameter (rate = 1 / Beta)
-  if(distribution == "Gamma"){
-    f_params[2]        <- 1 /f_params[2]
-    names(f_params)[2] <- "rate"
-  }
-    
-  
+
   return(f_params)
   
 }
@@ -315,7 +309,7 @@ aggregate_days4spi <- function(Prod_data,
   
   # Converting the data to numeric
   x <- as.numeric(acu_ref)   
-  
+
   # Setting attributes of the data
   nn         <- length(x)
   time.index <- 1:nn
@@ -521,7 +515,6 @@ aggregate_days4spi <- function(Prod_data,
   
   # Converting from rate to beta in the case of the Gamma distribution
   if(distribution == "Gamma"){
-    params$rate <- 1 / params$rate
     names(params)[which(names(params) == "rate")] <- "beta"
     names(params)[which(names(params) == "shape")] <- "alpha"
   }

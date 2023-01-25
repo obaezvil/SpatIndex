@@ -207,7 +207,8 @@ calculate_params <- function(P_data,
     periods <- periods[-pos]
   
   # Inisialising an empty list to store the results
-  res <- list()
+  res   <- list()
+  means <- list()
   
   cat("| Initialisation of iteration process. This may require a lot of time! | \n")
   
@@ -226,6 +227,9 @@ calculate_params <- function(P_data,
     # Computing the accumulations
     Prod_data <- aggregate_days4spi(P_data, scale = scale, trgt = target)
     
+    # Storing mean values to the means object
+    means[[i]] <- mean(Prod_data)
+    
     # Calculating the probability of zero
     ref_period <- c(ref_start, ref_end)
     if(is.null(ref_period))
@@ -240,7 +244,8 @@ calculate_params <- function(P_data,
   }
   
   # Stacking the list
-  res <-terra::rast(res)
+  res   <- terra::rast(res)
+  means <- terra::rast(means)
   
   # Getting the names of the parameters
   param_names <- unique(names(res))
@@ -259,6 +264,7 @@ calculate_params <- function(P_data,
   sep_params$probability_zero <- pze
   sep_params$distribution     <- distribution
   sep_params$package          <- package
+  sep_params$mean_vals        <- means
   
   
   class(sep_params) <- "params_list"
@@ -475,6 +481,7 @@ write_parameters <- function(params_list, dir, folder_name = NULL, export = FALS
     parameters_path <- file.path(dir, folder_name, "Parameters")
     pze_path        <- file.path(dir, folder_name, "Prob_zeroes")
     attributes_path <- file.path(dir, folder_name, "Attributes")
+    mean_vals_path  <- file.path(dir, folder_name, "Mean_values")
     
     # Creating folders
     if(!file.exists(pze_path))
@@ -483,15 +490,19 @@ write_parameters <- function(params_list, dir, folder_name = NULL, export = FALS
       dir.create(parameters_path, recursive = TRUE)
     if(!file.exists(attributes_path))
       dir.create(attributes_path, recursive = TRUE)
+    if(!file.exists(mean_vals_path))
+      dir.create(mean_vals_path, recursive = TRUE)
     
     # Checking the position of the distribution and package in the list
     pos_attributes <- which(names(params_list) %in% c("distribution", "package"))
     pos_pze        <- which(names(params_list) %in% c("probability_zero"))
-    
+    pos_means      <- which(names(params_list) %in% c("mean_vals"))
+      
     # Storing the attributes in an object and excluding them from the 'params_list' object
     pze            <- params_list[[pos_pze]]
     attributes     <- params_list[pos_attributes]
-    params_list    <- params_list[-c(pos_attributes, pos_pze)]
+    means          <- params_list[[pos_means]]
+    params_list    <- params_list[-c(pos_attributes, pos_pze, pos_means)]
     param_names    <- names(params_list)
     
     # Storing parameters NC files
@@ -507,8 +518,13 @@ write_parameters <- function(params_list, dir, folder_name = NULL, export = FALS
     pze_name <- file.path(pze_path, "Prob_zeroes.nc")
     writeCDF(pze, pze_name, overwrite = TRUE)
     
+    # Storing Mean Values
+    means_name <- file.path(mean_vals_path, "Mean_values.nc")
+    writeCDF(means, means_name, overwrite = TRUE)
+    
     # Storing attributes
     saveRDS(attributes, file.path(attributes_path, "Attributes.RDS"))
+    write.table(attributes, file.path(attributes_path, "Attributes.csv"), sep = ",", row.names = FALSE)
     
   } # end if
   
@@ -536,6 +552,7 @@ read_parameters <- function(dir, folder_name = NULL){
   parameters_path <- file.path(dir, "Parameters")
   pze_path        <- file.path(dir, "Prob_zeroes")
   attributes_path <- file.path(dir, "Attributes")
+  mean_vals_path  <- file.path(dir, folder_name, "Mean_values")
    
   # Generating the parameter layers
   params_list_files <- list.files(parameters_path, full.names = TRUE, pattern = ".nc$")
@@ -553,6 +570,10 @@ read_parameters <- function(dir, folder_name = NULL){
   pze <- file.path(pze_path, "Prob_zeroes.nc")
   pze <- terra::rast(pze)
   
+  # Reading the mean values
+  means <- file.path(mean_vals_path, "Mean_values.nc")
+  means <- terra::rast(means)
+  
   # Reading attributes
   attributes <- file.path(attributes_path, "Attributes.RDS")
   attributes <- readRDS(attributes)
@@ -561,6 +582,7 @@ read_parameters <- function(dir, folder_name = NULL){
   params_list$distribution     <- attributes$distribution
   params_list$package          <- attributes$package
   params_list$probability_zero <- pze
+  params_list$mean_vals        <- means
   
   class(params_list) <- "params_list"
   

@@ -274,7 +274,7 @@ calculate_params <- function(P_data,
 }
 
 
-#' Kalman smoothing to daily SPI and SPEI parameters
+#' Kalman smoothing to daily SPI and SPEI parameters (only works for gamma and log-logistic)
 #'
 #' @param params_list List object that contain as many 'SparRaster' objects as parameters in the selected distribution.
 #'    This list must contain the names of the parameters. Please see the 'calculate_params' function.
@@ -302,11 +302,13 @@ kalman_parameters <- function(params_list, H, ...){
   # Checking the position of the distribution and package in the list
   pos_attributes <- which(names(params_list) %in% c("distribution", "package"))
   pos_pze        <- which(names(params_list) %in% "probability_zero") 
+  pos_means      <- which(names(params_list) %in% c("mean_vals"))
   
   # Storing the attributes in an object and excluding them from the 'params_list' object
   attributes     <- params_list[pos_attributes]
   pze            <- params_list[[pos_pze]]
-  params_list    <- params_list[-c(pos_attributes, pos_pze)]
+  means          <- params_list[[pos_means]]
+  params_list    <- params_list[-c(pos_attributes, pos_pze, pos_means)]
   
   # Applying the filter for every parameter
   parameters <- names(params_list)
@@ -331,8 +333,9 @@ kalman_parameters <- function(params_list, H, ...){
   
   # Passing the attributes to the final list
   res$probability_zero <- pze
-  res$distribution <- attributes$distribution
-  res$package      <- attributes$package
+  res$distribution     <- attributes$distribution
+  res$package          <- attributes$package
+  res$mean_vals        <- means
   
   class(res) <- "params_list"
   

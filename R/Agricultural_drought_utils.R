@@ -200,7 +200,7 @@
   x_ref <- x_zoo[pos_ini:pos_fin]
   
   # Obtaining the resulting unique steps
-  steps   <- substr(index(x_ref), 6, 10)
+  steps   <- substr(zoo::index(x_ref), 6, 10)
   u_steps <- unique(steps)
   
   # Calculating NAs in period

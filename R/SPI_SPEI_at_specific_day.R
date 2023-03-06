@@ -181,7 +181,8 @@ params_spei <- function(Prod_data,
 #' @param fit Optional value indicating the name of the method used for computing the distribution function parameters 
 #'  (one of 'ub-pwm', 'pp-pwm' and 'max-lik'). Defaults to 'ub-pwm'.
 #' @param package Either 'SCI' or 'SPEI'. Should the SCI or SPEI package be used in the implementation?
-#'
+#' @param temporal_scale Scale from the Prod_data, either 'daily' or 'monthly'.
+#' 
 #' @return This function returns the fit parameters of the selected distribution for all days. 
 #' Please note that this function actively excludes the 29th of February for consistency reasons. The dates of the return 'SpatRaster'
 #' represent the days for the calculated parameters. The last year in the computation is used in the dates (in case that ref_end exist, that year is used).
@@ -194,7 +195,8 @@ calculate_params <- function(Prod_data,
                              ref_end = NULL, 
                              distribution, 
                              fit = "ub-pwm",
-                             package = "SCI"){
+                             package = "SCI",
+                             temporal_scale = "daily"){
   
   # Setting values to be used in the iteration process
   dates   <- terra::time(Prod_data)
@@ -225,10 +227,10 @@ calculate_params <- function(Prod_data,
     cat("Processing", periods[i], ":")
     
     # Computing the accumulations
-    Prod <- aggregate_days4spi(Prod_data, scale = scale, trgt = target)
+    Prod <- aggregate_days4spi(Prod_data, scale = scale, trgt = target, temporal_scale = temporal_scale)
     
     # Storing mean values to the means object
-    means[[i]] <- mean(Prod)
+    means[[i]] <- terra::mean(Prod)
     
     # Calculating the probability of zero
     ref_period <- c(ref_start, ref_end)

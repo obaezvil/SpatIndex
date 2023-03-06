@@ -240,6 +240,9 @@ calculate_params <- function(P_data,
     res[[i]] <- params_spi(Prod_data, trgt = target, ref_start = ref_start, 
                            ref_end = ref_end, distribution = distribution, fit = fit, package = package)
     
+    # retrieving class of object
+    cat(class(res[[i]])[i])
+    
     cat(" Done! \n")
   }
   
@@ -314,6 +317,12 @@ kalman_parameters <- function(params_list, H, ...){
   parameters <- names(params_list)
   dates      <- terra::time(params_list[[1]])
   res        <- list()
+  
+  # Smoothing scale/rate parameters according to package if gamma
+  
+  
+  
+  
   
   for(i in 1:length(parameters)){
     
@@ -555,7 +564,7 @@ read_parameters <- function(dir, folder_name = NULL){
   parameters_path <- file.path(dir, "Parameters")
   pze_path        <- file.path(dir, "Prob_zeroes")
   attributes_path <- file.path(dir, "Attributes")
-  mean_vals_path  <- file.path(dir, folder_name, "Mean_values")
+  mean_vals_path  <- file.path(dir, "Mean_values")
    
   # Generating the parameter layers
   params_list_files <- list.files(parameters_path, full.names = TRUE, pattern = ".nc$")

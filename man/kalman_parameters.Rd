@@ -2,7 +2,7 @@
 % Please edit documentation in R/SPI_SPEI_at_specific_day.R
 \name{kalman_parameters}
 \alias{kalman_parameters}
-\title{Kalman smoothing to daily SPI and SPEI parameters}
+\title{Kalman smoothing to daily SPI and SPEI parameters (only works for gamma and log-logistic)}
 \usage{
 kalman_parameters(params_list, H, ...)
 }
@@ -18,5 +18,5 @@ This list must contain the names of the parameters. Please see the 'calculate_pa
 The smoothed parameters in a list.
 }
 \description{
-Kalman smoothing to daily SPI and SPEI parameters
+Kalman smoothing to daily SPI and SPEI parameters (only works for gamma and log-logistic)
 }

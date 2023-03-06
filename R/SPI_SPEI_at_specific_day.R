@@ -247,7 +247,9 @@ calculate_params <- function(Prod_data,
   }
   
   # Stacking the list
+  print(summary(res))
   res   <- terra::rast(res)
+  print(summary(means))
   means <- terra::rast(means)
   
   # Getting the names of the parameters

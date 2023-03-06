@@ -166,7 +166,7 @@ params_spei <- function(Prod_data,
 
 #' Calculation of the parameters of a selected probability distribution for all days (SPI and SPEI).
 #'
-#' @param P_data ''SpatRaster' object that contains spatially-distributed daily precipitation data that will be used to calculate the 
+#' @param Prod_data ''SpatRaster' object that contains spatially-distributed daily precipitation data that will be used to calculate the 
 #'  accumulations according a selected scale. This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can 
 #'  be set with the function time of the terra package.
 #' @param scale Integer value that represents the time scale at which the SPI will be computed.
@@ -188,7 +188,7 @@ params_spei <- function(Prod_data,
 #' @export
 #'
 #' @examples
-calculate_params <- function(P_data,  
+calculate_params <- function(Prod_data,  
                              scale,
                              ref_start = NULL,
                              ref_end = NULL, 
@@ -225,23 +225,23 @@ calculate_params <- function(P_data,
     cat("Processing", periods[i], ":")
     
     # Computing the accumulations
-    Prod_data <- aggregate_days4spi(P_data, scale = scale, trgt = target)
+    Prod <- aggregate_days4spi(P_data, scale = scale, trgt = target)
     
     # Storing mean values to the means object
-    means[[i]] <- mean(Prod_data)
+    means[[i]] <- mean(Prod)
     
     # Calculating the probability of zero
     ref_period <- c(ref_start, ref_end)
     if(is.null(ref_period))
       ref_period <- "None"
-    pze        <- terra::app(Prod_data, .calculate_pze, ref_period = ref_period, dates = dates)
+    pze        <- terra::app(Prod, .calculate_pze, ref_period = ref_period, dates = dates)
     
     # Calculating the parameters for the respective day
-    res[[i]] <- params_spi(Prod_data, trgt = target, ref_start = ref_start, 
+    res[[i]] <- params_spi(Prod, trgt = target, ref_start = ref_start, 
                            ref_end = ref_end, distribution = distribution, fit = fit, package = package)
     
     # retrieving class of object
-    cat(class(res[[i]])[i])
+    cat(class(res[[i]])[1])
     
     cat(" Done! \n")
   }

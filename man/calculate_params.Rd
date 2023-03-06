@@ -5,17 +5,18 @@
 \title{Calculation of the parameters of a selected probability distribution for all days (SPI and SPEI).}
 \usage{
 calculate_params(
-  P_data,
+  Prod_data,
   scale,
   ref_start = NULL,
   ref_end = NULL,
   distribution,
   fit = "ub-pwm",
-  package = "SCI"
+  package = "SCI",
+  temporal_scale = "daily"
 )
 }
 \arguments{
-\item{P_data}{''SpatRaster' object that contains spatially-distributed daily precipitation data that will be used to calculate the 
+\item{Prod_data}{''SpatRaster' object that contains spatially-distributed daily precipitation data that will be used to calculate the 
 accumulations according a selected scale. This 'SpatRaster' must include the time that corresponds to the dates of the respective layers. They can 
 be set with the function time of the terra package.}
 

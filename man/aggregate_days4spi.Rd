@@ -4,7 +4,7 @@
 \alias{aggregate_days4spi}
 \title{Accumulations to be used by the daily_spi and daily_spei functions,}
 \usage{
-aggregate_days4spi(Prod_data, scale, trgt = NULL)
+aggregate_days4spi(Prod_data, scale, trgt = NULL, temporal_scale = "daily")
 }
 \arguments{
 \item{Prod_data}{'SpatRaster' object that contains spatially-distributed monthly precipitation data that will be used to calculate the SPI. 

@@ -197,7 +197,7 @@ calculate_params <- function(Prod_data,
                              package = "SCI"){
   
   # Setting values to be used in the iteration process
-  dates   <- terra::time(P_data)
+  dates   <- terra::time(Prod_data)
   periods <- substr(dates, 6, 10)
   periods <- unique(periods)
   
@@ -225,7 +225,7 @@ calculate_params <- function(Prod_data,
     cat("Processing", periods[i], ":")
     
     # Computing the accumulations
-    Prod <- aggregate_days4spi(P_data, scale = scale, trgt = target)
+    Prod <- aggregate_days4spi(Prod_data, scale = scale, trgt = target)
     
     # Storing mean values to the means object
     means[[i]] <- mean(Prod)

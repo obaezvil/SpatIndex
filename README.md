@@ -8,10 +8,15 @@ This R package provides a simple way of computing spatially-distributed drought 
 
 ### Installation
 
-Install the development version from GitHub:
+First, the **spatstat.core** package must be installed:
+```r
+remotes::install_github("spatstat/spatstat.core")
+```
+
+Then, install the development version from GitHub:
 
 ```r
-remotes::install_github("obaezvil/SpatInex")
+remotes::install_github("obaezvil/SpatIndex")
 ```
 
 ### Drought analysis
